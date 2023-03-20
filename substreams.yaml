@@ -1,0 +1,74 @@
+specVersion: v0.1.0
+package:
+  name: "substreams_template"
+  version: v0.1.0
+
+protobuf:
+  files:
+    - database.proto
+    - dcl.proto
+
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_collection_created
+    kind: map
+    # initialBlock: 15202000 This is the when the first collection was created
+    initialBlock: 40349877
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:dcl.Collections
+
+  - name: store_collections
+    kind: store
+    # initialBlock: 15202000
+    initialBlock: 40349877
+    updatePolicy: append
+    valueType: string
+    inputs:
+      - map: map_collection_created
+
+  - name: map_issues
+    kind: map
+    initialBlock: 40349877
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections
+    output:
+      type: proto:dcl.Issues
+
+  - name: map_add_items
+    kind: map
+    # initialBlock: 15202000
+    initialBlock: 40349877
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - map: map_collection_created # depends on the map and not store because the AddItem happens in the same block as the ProxyCreated event, so the store won't have the address yet
+    output:
+      type: proto:dcl.Items
+
+  - name: map_collection_complete
+    kind: map
+    initialBlock: 40349877
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - map: map_collection_created # depends on the map and not store because the complete happens in the same block as the ProxyCreated event, so the store won't have the address yet
+    output:
+      type: proto:dcl.Items
+
+  - name: db_out
+    # initialBlock: 15202000
+    initialBlock: 40349877
+    kind: map
+    inputs:
+      - map: map_collection_created
+      - map: map_add_items
+    output:
+      type: proto:sf.substreams.sink.database.v1.DatabaseChanges

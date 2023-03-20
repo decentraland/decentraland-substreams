@@ -38,7 +38,7 @@ pub fn map_collection_created(
                 log::info!("creator: {}", dcl_hex!(creator));
                 let address = format!("{}", Hex(event.address));
                 dcl::Collection {
-                    address: address.to_string(),
+                    address,
                     creator: dcl_hex!(creator),
                     created_at: blk.timestamp_seconds(),
                 }
@@ -65,15 +65,17 @@ pub fn map_issues(
         None => Ok(dcl::Issues { issues: vec![] }),
         Some(from_store_unwrapped) => {
             let _: Vec<_> = from_store_unwrapped
-                .split(";")
+                .split(';')
                 .map(|v| v.to_string())
                 .inspect(|x| substreams::log::info!("element {}", x))
                 .collect();
 
             let mut addresses = vec![];
-            for address in from_store_unwrapped.split(";") {
-                let decoded = hex::decode(address).unwrap();
-                addresses.push(decoded);
+            for address in from_store_unwrapped.split(';') {
+                match hex::decode(address) {
+                    Ok(decoded) => addresses.push(decoded),
+                    Err(_err) => log::debug!("Err decoding address {}", address),
+                }
             }
             //@TODO: see why the pop is needed
             addresses.pop();
@@ -109,8 +111,10 @@ pub fn map_add_items(
 ) -> Result<dcl::Items, substreams::errors::Error> {
     let mut addresses = vec![];
     for collection in collections.collections {
-        let decoded = hex::decode(collection.address).unwrap();
-        addresses.push(decoded);
+        match hex::decode(&collection.address) {
+            Ok(decoded) => addresses.push(decoded),
+            Err(_err) => log::debug!("Err decoding the collection address {}", collection.address),
+        }
     }
     let mut addresses_ref = vec![];
     for address in &addresses {
@@ -165,8 +169,10 @@ pub fn map_collection_complete(
 ) -> Result<dcl::Items, substreams::errors::Error> {
     let mut addresses = vec![];
     for collection in collections.collections {
-        let decoded = hex::decode(collection.address).unwrap();
-        addresses.push(decoded);
+        match hex::decode(&collection.address) {
+            Ok(decoded) => addresses.push(decoded),
+            Err(_err) => log::debug!("Err decoding address {}", collection.address),
+        }
     }
     let mut addresses_ref = vec![];
     for address in &addresses {
@@ -175,36 +181,38 @@ pub fn map_collection_complete(
     Ok(dcl::Items {
         items: blk
             .events::<abi::collections_v2::events::Complete>(&addresses_ref)
-            .map(|(complete_event, log)| {
+            .flat_map(|(complete_event, log)| {
                 log::info!("Complete event found! {:?}", complete_event);
                 let collection_item_count = rpc::get_collection_item_count(log.address().to_vec());
                 let mut items = vec![];
-                let item_amount = BigInt::to_u64(&collection_item_count.unwrap());
+                let item_amount =
+                    BigInt::to_u64(&collection_item_count.unwrap_or_else(BigInt::zero));
                 for n in 0..item_amount {
-                    let item = rpc::get_collection_item(log.address().to_vec(), n).unwrap();
-                    items.push(dcl::Item {
-                        id: utils::get_item_id(Hex(log.address()).to_string(), n.to_string()),
-                        rarity: item.0,
-                        max_supply: Some(item.1.into()),
-                        total_supply: Some(dcl::BigInt {
-                            value: item.2.to_string(),
+                    match rpc::get_collection_item(log.address().to_vec(), n) {
+                        Some(item) => items.push(dcl::Item {
+                            id: utils::get_item_id(Hex(log.address()).to_string(), n.to_string()),
+                            rarity: item.0,
+                            max_supply: Some(item.1.into()),
+                            total_supply: Some(dcl::BigInt {
+                                value: item.2.to_string(),
+                            }),
+                            price: Some(dcl::BigInt {
+                                value: item.3.to_string(),
+                            }),
+                            beneficiary: Hex(item.4).to_string(),
+                            metadata: item.5,
+                            content_hash: item.6,
+                            blockchain_item_id: Some(dcl::BigInt {
+                                value: n.to_string(),
+                            }),
+                            collection_id: Hex(log.address()).to_string(),
+                            created_at: blk.timestamp_seconds(),
                         }),
-                        price: Some(dcl::BigInt {
-                            value: item.3.to_string(),
-                        }),
-                        beneficiary: Hex(item.4).to_string(),
-                        metadata: item.5,
-                        content_hash: item.6,
-                        blockchain_item_id: Some(dcl::BigInt {
-                            value: n.to_string(),
-                        }),
-                        collection_id: Hex(log.address()).to_string(),
-                        created_at: blk.timestamp_seconds(),
-                    })
+                        None => continue,
+                    }
                 }
                 items
             })
-            .flatten()
             .collect::<Vec<dcl::Item>>(),
     })
 }

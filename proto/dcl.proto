@@ -22,6 +22,7 @@ message Item {
     BigInt blockchain_item_id = 9;
     string collection_id = 10;
     uint64 created_at = 11;
+    string item_type = 12;
 }
 
 message Collections {
@@ -30,8 +31,13 @@ message Collections {
 
 message Collection {
     string address = 1;
-    string creator = 2;
-    uint64 created_at = 3;
+    string name = 2;
+    string symbol = 3;
+    string creator = 4;
+    string owner = 5;
+    bool is_completed = 6;
+    bool is_approved = 7;
+    uint64 created_at = 8;
 }
 
 message Issues {

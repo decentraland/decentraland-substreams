@@ -1,13 +1,17 @@
 CREATE TABLE collections (
 	id TEXT NOT NULL PRIMARY KEY,
 	creator TEXT NOT NULL,
+	is_approved BOOLEAN NOT NULL DEFAULT false,
+	name TEXT NOT NULL,
+	symbol TEXT NOT NULL,
+	owner TEXT NOT NULL,
+	is_completed BOOLEAN NOT NULL DEFAULT false,
 	created_at INTEGER NOT NULL -- created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), @TODO: do we need timestamp?
 	-- updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 create TABLE items (
 	id TEXT NOT NULL PRIMARY KEY,
 	blockchain_item_id BigInt NOT NULL,
-	creator TEXT NOT NULL,
 	-- check if needed
 	item_type TEXT NOT NULL,
 	-- check type

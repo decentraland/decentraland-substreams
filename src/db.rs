@@ -1,12 +1,12 @@
-use crate::dcl_hex;
 use crate::pb::dcl;
 use crate::utils::sanitize_sql_string;
+use crate::{dcl_hex, pb::dcl::Collections};
 use substreams::prelude::BigInt;
 use substreams_database_change::pb::database::{table_change, DatabaseChanges};
 
 pub fn transform_collection_database_changes(
     changes: &mut DatabaseChanges,
-    collections: dcl::Collections,
+    collections: Collections,
 ) {
     for collection in collections.collections {
         changes
@@ -16,8 +16,13 @@ pub fn transform_collection_database_changes(
                 0,
                 table_change::Operation::Create,
             )
-            .change("created_at", (None, collection.created_at))
-            .change("creator", (None, collection.creator));
+            .change("creator", (None, dcl_hex!(collection.creator)))
+            .change("is_approved", (None, collection.is_approved))
+            .change("is_completed", (None, collection.is_completed))
+            .change("name", (None, sanitize_sql_string(collection.name)))
+            .change("symbol", (None, collection.symbol))
+            .change("owner", (None, dcl_hex!(collection.owner)))
+            .change("created_at", (None, collection.created_at));
     }
 }
 
@@ -33,20 +38,50 @@ pub fn transform_item_database_changes(changes: &mut DatabaseChanges, items: dcl
             )
             .change(
                 "blockchain_item_id",
-                (None, BigInt::from(item.blockchain_item_id.unwrap())),
+                (
+                    None,
+                    BigInt::from(item.blockchain_item_id.unwrap_or(dcl::BigInt {
+                        value: String::from("0"),
+                    })),
+                ),
             )
-            .change("creator", (None, String::from("some creator"))) //@TODO get this value, we could use the one from collections
-            .change("item_type", (None, String::from("wearable"))) //@TODO get this value, parse from metadata
-            .change("price", (None, BigInt::from(item.price.unwrap())))
+            .change("item_type", (None, item.item_type))
+            .change(
+                "price",
+                (
+                    None,
+                    BigInt::from(item.price.unwrap_or(dcl::BigInt {
+                        value: String::from("0"),
+                    })),
+                ),
+            )
             .change(
                 "total_supply",
-                (None, BigInt::from(item.total_supply.clone().unwrap())),
+                (
+                    None,
+                    BigInt::from(item.total_supply.clone().unwrap_or(dcl::BigInt {
+                        value: String::from("0"),
+                    })),
+                ),
             )
             .change(
                 "available",
-                (None, BigInt::from(item.total_supply.unwrap())),
+                (
+                    None,
+                    BigInt::from(item.max_supply.clone().unwrap_or(dcl::BigInt {
+                        value: String::from("0"),
+                    })),
+                ),
             )
-            .change("max_supply", (None, BigInt::from(item.max_supply.unwrap())))
+            .change(
+                "max_supply",
+                (
+                    None,
+                    BigInt::from(item.max_supply.unwrap_or(dcl::BigInt {
+                        value: String::from("0"),
+                    })),
+                ),
+            )
             .change("rarity", (None, item.rarity))
             .change("beneficiary", (None, item.beneficiary))
             .change("raw_metadata", (None, sanitized_metadata))

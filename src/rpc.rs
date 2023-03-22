@@ -2,28 +2,85 @@ use crate::abi;
 use substreams::{scalar::BigInt, Hex};
 use substreams_ethereum::rpc::RpcBatch;
 
-pub fn collection_data_call(collection_address: Vec<u8>) -> String {
+// (Creator, is_approved, Name, Symbol, Owner, is_complete, is_editable, itemsCount )
+pub type CollectionDataTuple = (String, bool, String, String, String, bool);
+
+pub fn collection_data_call(collection_address: Vec<u8>) -> CollectionDataTuple {
     // using RpcBatch since it will fetch more data in a batch later on
     match RpcBatch::new()
         .add(
             abi::collections_v2::functions::Creator {},
+            collection_address.clone(),
+        )
+        .add(
+            abi::collections_v2::functions::IsApproved {},
+            collection_address.clone(),
+        )
+        .add(
+            abi::collections_v2::functions::Name {},
+            collection_address.clone(),
+        )
+        .add(
+            abi::collections_v2::functions::Symbol {},
+            collection_address.clone(),
+        )
+        .add(
+            abi::collections_v2::functions::Owner {},
+            collection_address.clone(),
+        )
+        .add(
+            abi::collections_v2::functions::IsCompleted {},
+            collection_address.clone(),
+        )
+        .add(
+            abi::collections_v2::functions::IsApproved {},
             collection_address,
         )
         .execute()
     {
         Ok(responses) => {
-            let creator: String = match RpcBatch::decode::<_, abi::collections_v2::functions::Creator>(
+            let creator = RpcBatch::decode::<_, abi::collections_v2::functions::Creator>(
                 &responses.responses[0],
-            ) {
-                Some(data) => Hex(data).to_string(),
-                None => {
-                    panic!("Failed to decode fee growth global 1x128");
-                }
-            };
+            )
+            .unwrap_or_else(|| String::from("").as_bytes().to_vec());
+            let is_approved = RpcBatch::decode::<_, abi::collections_v2::functions::IsApproved>(
+                &responses.responses[1],
+            )
+            .unwrap_or(false);
+            let name = RpcBatch::decode::<_, abi::collections_v2::functions::Name>(
+                &responses.responses[2],
+            )
+            .unwrap_or_else(|| String::from(""));
+            let symbol = RpcBatch::decode::<_, abi::collections_v2::functions::Symbol>(
+                &responses.responses[3],
+            )
+            .unwrap_or_else(|| String::from(""));
+            let owner = RpcBatch::decode::<_, abi::collections_v2::functions::Owner>(
+                &responses.responses[4],
+            )
+            .unwrap_or_else(|| String::from("").as_bytes().to_vec());
+            let is_completed = RpcBatch::decode::<_, abi::collections_v2::functions::IsCompleted>(
+                &responses.responses[5],
+            )
+            .unwrap_or(false);
 
-            creator
+            (
+                Hex(creator).to_string(),
+                is_approved,
+                name,
+                symbol,
+                Hex(owner).to_string(),
+                is_completed,
+            )
         }
-        Err(_err) => String::from(""),
+        Err(_err) => (
+            String::from(""),
+            false,
+            String::from(""),
+            String::from(""),
+            String::from(""),
+            false,
+        ),
     }
 }
 

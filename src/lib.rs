@@ -31,15 +31,19 @@ pub fn map_collection_created(
             .events::<abi::collection_factoryv3::events::ProxyCreated>(&[
                 &COLLECTIONS_FACTORY,
                 &COLLECTIONS_V3_FACTORY,
-            ]) //@TODO try out if the COLLECTIONS_FACTORY has the same TOPIC_0 and if it matches the event
+            ])
             .map(|(event, _log)| {
                 substreams::log::info!("Collection created {:?}", event);
-                let creator = rpc::collection_data_call(event.address.clone()); //@TODO avoid clone?
-                log::info!("creator: {}", dcl_hex!(creator));
-                let address = format!("{}", Hex(event.address));
+                let collection_data = rpc::collection_data_call(event.address.clone()); //@TODO avoid clone?
+                log::info!("creator: {}", dcl_hex!(collection_data.0));
                 dcl::Collection {
-                    address,
-                    creator: dcl_hex!(creator),
+                    address: Hex(event.address).to_string(),
+                    creator: collection_data.0,
+                    is_approved: collection_data.1,
+                    name: collection_data.2,
+                    symbol: collection_data.3,
+                    owner: collection_data.4,
+                    is_completed: collection_data.5,
                     created_at: blk.timestamp_seconds(),
                 }
             })
@@ -67,7 +71,6 @@ pub fn map_issues(
             let _: Vec<_> = from_store_unwrapped
                 .split(';')
                 .map(|v| v.to_string())
-                .inspect(|x| substreams::log::info!("element {}", x))
                 .collect();
 
             let mut addresses = vec![];
@@ -150,11 +153,12 @@ pub fn map_add_items(
                     total_supply: Some(total_supply.into()),
                     price: Some(price.into()),
                     beneficiary: Hex(beneficiary).to_string(),
-                    metadata,
+                    metadata: metadata.clone(),
                     content_hash,
                     blockchain_item_id: Some(add_item_event.item_id.into()),
                     collection_id: Hex(log.address()).to_string(),
                     created_at: blk.timestamp_seconds(),
+                    item_type: utils::items::build_item_metadata(metadata).item_type,
                 }
             })
             .collect(),
@@ -200,13 +204,14 @@ pub fn map_collection_complete(
                                 value: item.3.to_string(),
                             }),
                             beneficiary: Hex(item.4).to_string(),
-                            metadata: item.5,
+                            metadata: item.5.clone(),
                             content_hash: item.6,
                             blockchain_item_id: Some(dcl::BigInt {
                                 value: n.to_string(),
                             }),
                             collection_id: Hex(log.address()).to_string(),
                             created_at: blk.timestamp_seconds(),
+                            item_type: utils::items::build_item_metadata(item.5).item_type,
                         }),
                         None => continue,
                     }

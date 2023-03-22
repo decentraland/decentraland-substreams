@@ -1,3 +1,4 @@
+pub mod items;
 use std::str::FromStr;
 use substreams::scalar::BigInt;
 

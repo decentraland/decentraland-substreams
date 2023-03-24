@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package dcl;
+
+message BigInt {
+    string value = 1;
+}
+  
+message Items {
+    repeated Item items = 1;
+}
+
+message Item {
+    string id = 1;
+    string rarity = 2;
+    BigInt max_supply = 3;
+    BigInt total_supply = 4;
+    BigInt price = 5;
+    string beneficiary = 6;
+    string metadata = 7;
+    string content_hash = 8;
+    BigInt blockchain_item_id = 9;
+    string collection_id = 10;
+    uint64 created_at = 11;
+    string item_type = 12;
+}
+
+message Collections {
+    repeated Collection collections = 1;
+}
+
+message Collection {
+    string address = 1;
+    string name = 2;
+    string symbol = 3;
+    string creator = 4;
+    string owner = 5;
+    bool is_completed = 6;
+    bool is_approved = 7;
+    uint64 created_at = 8;
+}
+
+message Issues {
+    repeated Issue issues = 1;
+}
+  
+message Issue {
+    string beneficiary = 1;
+    BigInt tokenId = 2;
+    BigInt itemId = 3;
+    BigInt issuedId = 4;
+}
+  

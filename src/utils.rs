@@ -1,11 +1,13 @@
+pub mod nfts;
 pub mod items;
+pub mod orders;
 use std::str::FromStr;
 use substreams::scalar::BigInt;
 
 use crate::pb::dcl;
 
 pub fn get_item_id(contract_address: String, item_id: String) -> String {
-    format!("{}-{}", contract_address, item_id)
+    format!("0x{}-{}", contract_address, item_id)
 }
 
 impl From<substreams::scalar::BigInt> for dcl::BigInt {

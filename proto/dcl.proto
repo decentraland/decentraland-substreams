@@ -40,14 +40,37 @@ message Collection {
     uint64 created_at = 8;
 }
 
-message Issues {
-    repeated Issue issues = 1;
+message NFTs {
+    repeated NFT nfts = 1;
 }
   
-message Issue {
+message NFT {
     string beneficiary = 1;
     BigInt tokenId = 2;
-    BigInt itemId = 3;
+    string itemId = 3;
     BigInt issuedId = 4;
+    string collection_address = 5;
+    string created_at = 6;
+    string updated_at = 7;
 }
   
+
+message Orders {
+    repeated Order orders = 1;
+}
+  
+message Order {
+    string id = 1;
+    string marketplace_address = 2;
+    string nft_id = 3;
+    BigInt token_id = 4;
+    string tx_hash = 5;
+    string owner = 6;
+    string buyer = 7;
+    BigInt price = 8;
+    string status = 9;
+    uint64 block_number = 10;
+    BigInt expires_at = 11;
+    uint64 updated_at = 12;
+}
+

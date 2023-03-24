@@ -9,3 +9,10 @@ pub mod collections_v2;
 #[path = "collectionV2.modified.rs"]
 #[allow(dead_code)]
 pub mod collections_v2_fixed;
+
+#[path = "marketplace.rs"]
+#[allow(dead_code)]
+pub mod marketplace;
+#[path = "marketplacev2.rs"]
+#[allow(dead_code)]
+pub mod marketplacev2;

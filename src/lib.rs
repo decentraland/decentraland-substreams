@@ -9,13 +9,12 @@ use hex_literal::hex;
 use pb::dcl;
 use substreams::prelude::*;
 use substreams::scalar::BigInt;
-use substreams::{log, store::StoreAppend, Hex};
+use substreams::{log, Hex};
 use substreams_database_change::pb::database::DatabaseChanges;
 use substreams_ethereum::pb::eth::v2 as eth;
+use substreams_ethereum::Event;
 
 use crate::utils::sanitize_sql_string;
-
-static COLLECTION_STORE_KEY: &str = "addresses";
 
 // Polygon's Contracts
 const _MARKETPLACE_CONTRACT: [u8; 20] = hex!("02080031b45A3c67d338Dd4A2CC309D28756A160");
@@ -39,7 +38,6 @@ pub fn map_collection_created(
             .map(|(event, _log)| {
                 substreams::log::info!("Collection created {:?}", event);
                 let collection_data = rpc::collection_data_call(event.address.clone()); //@TODO avoid clone?
-                log::info!("creator: {}", dcl_hex!(collection_data.0));
                 dcl::Collection {
                     address: Hex(event.address).to_string(),
                     creator: collection_data.0,
@@ -57,9 +55,9 @@ pub fn map_collection_created(
 
 /// Store addresses of the collections created by map_collection_created
 #[substreams::handlers::store]
-pub fn store_collections(collections: dcl::Collections, store: StoreAppend<String>) {
+pub fn store_collections(collections: dcl::Collections, store: StoreSetString) {
     for collection in collections.collections {
-        store.append(0, COLLECTION_STORE_KEY, collection.address); // since the store is a of a KV type, we're gonna store under the "address" key an string of contract addresses separated by comma
+        store.set(0, collection.address, &"".to_string()); // we don't really care about the value, we'll just check if the key is present in the store
     }
 }
 
@@ -69,52 +67,38 @@ pub fn map_issues(
     blk: eth::Block,
     collections_store: substreams::store::StoreGetString,
 ) -> Result<dcl::NfTs, substreams::errors::Error> {
-    match collections_store.get_first(COLLECTION_STORE_KEY) {
-        None => Ok(dcl::NfTs { nfts: vec![] }),
-        Some(from_store_unwrapped) => {
-            let _: Vec<_> = from_store_unwrapped
-                .split(';')
-                .map(|v| v.to_string())
-                .collect();
-
-            let mut addresses = vec![];
-            for address in from_store_unwrapped.split(';') {
-                match hex::decode(address) {
-                    Ok(decoded) => addresses.push(decoded),
-                    Err(_err) => log::debug!("Err decoding address {}", address),
-                }
-            }
-            //@TODO: see why the pop is needed
-            addresses.pop();
-            let mut addresses_ref = vec![];
-            for address in &addresses {
-                addresses_ref.push(address.as_slice());
+    let mut nfts = vec![];
+    for trx in blk.transactions() {
+        for call in trx.calls.iter() {
+            let _call_index = call.index;
+            if call.state_reverted {
+                continue;
             }
 
-            Ok(dcl::NfTs {
-                nfts: blk
-                    .events::<abi::collections_v2::events::Issue>(&addresses_ref)
-                    .map(|(issue_event, log)| {
-                        log::info!("NFT Issue seen {:?}", issue_event);
+            for log in call.logs.iter() {
+                let collection_address = &Hex(log.clone().address).to_string();
+                if let Some(_collection) = collections_store.get_last(collection_address) {
+                    if let Some(event) = abi::collections_v2::events::Issue::match_and_decode(log) {
                         let timestamp = blk.timestamp_seconds().to_string();
-
-                        dcl::Nft {
-                            beneficiary: Hex(&issue_event.beneficiary).to_string(),
-                            issued_id: Some(issue_event.issued_id.into()),
+                        let nft = dcl::Nft {
+                            beneficiary: Hex(&event.beneficiary).to_string(),
+                            issued_id: Some(event.issued_id.into()),
                             item_id: utils::get_item_id(
-                                Hex(log.address()).to_string(),
-                                issue_event.item_id.to_string(),
+                                Hex(log.address.clone()).to_string(),
+                                event.item_id.to_string(),
                             ),
-                            token_id: Some(issue_event.token_id.into()),
-                            collection_address: Hex(log.address()).to_string(),
+                            token_id: Some(event.token_id.into()),
+                            collection_address: Hex(log.address.clone()).to_string(),
                             created_at: timestamp.clone(),
                             updated_at: timestamp,
-                        }
-                    })
-                    .collect(),
-            })
+                        };
+                        nfts.push(nft);
+                    }
+                }
+            }
         }
     }
+    Ok(dcl::NfTs { nfts })
 }
 
 /// Reads item creationg by the `AddItem` event
@@ -139,7 +123,6 @@ pub fn map_add_items(
         items: blk
             .events::<abi::collections_v2_fixed::events::AddItem>(&addresses_ref)
             .map(|(add_item_event, log)| {
-                log::info!("INFO: Add item found {:?}", add_item_event);
                 let item = add_item_event.item;
                 //@TODO missing fields:
                 // creation_fee => grab from oracle
@@ -196,8 +179,7 @@ pub fn map_collection_complete(
     Ok(dcl::Items {
         items: blk
             .events::<abi::collections_v2::events::Complete>(&addresses_ref)
-            .flat_map(|(complete_event, log)| {
-                log::info!("Complete event found! {:?}", complete_event);
+            .flat_map(|(_complete_event, log)| {
                 let collection_item_count = rpc::get_collection_item_count(log.address().to_vec());
                 let mut items = vec![];
                 let item_amount =
@@ -284,7 +266,7 @@ pub fn map_order_executed(blk: eth::Block) -> Result<dcl::Orders, substreams::er
         orders: blk
             .events::<abi::marketplacev2::events::OrderSuccessful>(&[&MARKETPLACEV2_CONTRACT])
             .map(|(event, log)| {
-                substreams::log::info!("Order created {:?}", event);
+                substreams::log::info!("Order executed {:?}", event);
                 dcl::Order {
                     id: Hex(event.id).to_string(),
                     marketplace_address: Hex(log.address()).to_string(),
@@ -313,7 +295,7 @@ pub fn map_order_cancelled(blk: eth::Block) -> Result<dcl::Orders, substreams::e
         orders: blk
             .events::<abi::marketplacev2::events::OrderCancelled>(&[&MARKETPLACEV2_CONTRACT])
             .map(|(event, log)| {
-                substreams::log::info!("Order created {:?}", event);
+                substreams::log::info!("Order cancelled {:?}", event);
                 dcl::Order {
                     id: Hex(event.id).to_string(),
                     marketplace_address: Hex(log.address()).to_string(),

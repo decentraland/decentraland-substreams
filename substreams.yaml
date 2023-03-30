@@ -1,6 +1,6 @@
 specVersion: v0.1.0
 package:
-  name: "substreams_template"
+  name: "decentraland_substreams"
   version: v0.1.0
 
 protobuf:
@@ -28,7 +28,7 @@ modules:
   - name: store_collections
     kind: store
     initialBlock: 15202000
-    updatePolicy: append
+    updatePolicy: set
     valueType: string
     inputs:
       - map: map_collection_created
@@ -40,11 +40,10 @@ modules:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections
     output:
-      type: proto:dcl.Issues
+      type: proto:dcl.NFTs
 
   - name: map_add_items
     kind: map
-    # initialBlock: 15202000
     initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block

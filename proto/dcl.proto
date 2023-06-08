@@ -74,3 +74,14 @@ message Order {
     uint64 updated_at = 12;
 }
 
+message Transfers {
+    repeated Transfer transfers = 1;
+}
+
+message Transfer {
+    string from = 1;
+    string to = 2;
+    BigInt token_id = 3;
+    uint64 block_timestamp = 4;
+}
+

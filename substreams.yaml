@@ -92,6 +92,15 @@ modules:
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:dcl.Orders
+  
+  - name: map_transfers
+    kind: map
+    initialBlock: 15202000
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections
+    output:
+      type: proto:dcl.Transfers
 
   - name: db_out
     initialBlock: 15202000
@@ -103,6 +112,7 @@ modules:
       - map: map_order_created
       - map: map_order_executed
       - map: map_order_cancelled
+      - map: map_transfers
       - store: store_orders
     output:
       type: proto:sf.substreams.sink.database.v1.DatabaseChanges

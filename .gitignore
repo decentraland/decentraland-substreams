@@ -7,3 +7,4 @@ buf.gen.yaml
 substreams
 postgres-data
 substreams-sink-postgres_darwin_x86_64/
+substreams-sink-postgres

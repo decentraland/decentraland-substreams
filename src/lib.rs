@@ -353,6 +353,7 @@ fn db_out(
     orders_executed: dcl::Orders,
     orders_cancelled: dcl::Orders,
     orders_store: substreams::store::StoreGetString,
+    transfers: dcl::Transfers,
 ) -> Result<DatabaseChanges, substreams::errors::Error> {
     let mut database_changes: DatabaseChanges = Default::default();
     log::info!("In db out collections {:?}", collections);
@@ -361,6 +362,8 @@ fn db_out(
     db::transform_item_database_changes(&mut database_changes, items);
     log::info!("In db out nfts {:?}", nfts);
     db::transform_nfts_database_changes(&mut database_changes, nfts);
+    log::info!("In db out transfers {:?}", transfers);
+    db::transform_transfers_database_changes(&mut database_changes, transfers);
     log::info!("In db out orders {:?}", orders);
     db::transform_orders_database_changes(&mut database_changes, orders.clone());
     //@TODO move this to a fn to keep db_out clean

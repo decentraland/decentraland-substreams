@@ -5,3 +5,5 @@ buf.gen.yaml
 /target
 *.spkg
 substreams
+postgres-data
+substreams-sink-postgres_darwin_x86_64/

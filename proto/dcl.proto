@@ -82,6 +82,7 @@ message Transfer {
     string from = 1;
     string to = 2;
     BigInt token_id = 3;
-    uint64 block_timestamp = 4;
+    string collection_id = 4;
+    uint64 block_timestamp = 5;
 }
 

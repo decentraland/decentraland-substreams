@@ -218,13 +218,15 @@ pub fn transform_transfers_database_changes(
             .push_change(
                 String::from("transfers"),
                 dcl_hex!(format!(
-                    "{}-{}",
+                    "{}-{}-{}",
+                    transfer.collection_id.clone(),
                     transfer.token_id.clone().unwrap().value,
                     transfer.block_timestamp
                 )),
                 0,
                 table_change::Operation::Create,
             )
+            .change("collection_id", (None, dcl_hex!(transfer.collection_id)))
             .change(
                 "token_id",
                 (

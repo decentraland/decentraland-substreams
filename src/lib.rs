@@ -434,6 +434,7 @@ pub fn map_transfers(
                             collection_id: collection_address.clone(),
                             block_timestamp: blk.timestamp_seconds(),
                             tx_hash: Hex(trx.hash.clone()).to_string(),
+                            log_index: log.index,
                         };
                         substreams::log::info!("Transfer: {:?}", transfer);
                         transfers.push(transfer);

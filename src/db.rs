@@ -220,7 +220,7 @@ pub fn transform_transfers_database_changes(
                 dcl_hex!(format!(
                     "{}-{}",
                     transfer.tx_hash.clone(),
-                    transfer.block_timestamp
+                    transfer.log_index
                 )),
                 0,
                 table_change::Operation::Create,

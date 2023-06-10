@@ -85,5 +85,6 @@ message Transfer {
     string collection_id = 4;
     uint64 block_timestamp = 5;
     string tx_hash = 6;
+    uint32 log_index = 7;
 }
 

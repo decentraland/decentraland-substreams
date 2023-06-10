@@ -433,6 +433,7 @@ pub fn map_transfers(
                             token_id: Some(event.token_id.into()),
                             collection_id: collection_address.clone(),
                             block_timestamp: blk.timestamp_seconds(),
+                            tx_hash: Hex(trx.hash.clone()).to_string(),
                         };
                         substreams::log::info!("Transfer: {:?}", transfer);
                         transfers.push(transfer);

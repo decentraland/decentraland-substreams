@@ -84,5 +84,6 @@ message Transfer {
     BigInt token_id = 3;
     string collection_id = 4;
     uint64 block_timestamp = 5;
+    string tx_hash = 6;
 }
 

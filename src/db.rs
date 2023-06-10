@@ -218,9 +218,8 @@ pub fn transform_transfers_database_changes(
             .push_change(
                 String::from("transfers"),
                 dcl_hex!(format!(
-                    "{}-{}-{}",
-                    transfer.collection_id.clone(),
-                    transfer.token_id.clone().unwrap().value,
+                    "{}-{}",
+                    transfer.tx_hash.clone(),
                     transfer.block_timestamp
                 )),
                 0,

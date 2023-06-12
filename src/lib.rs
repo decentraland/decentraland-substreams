@@ -454,13 +454,13 @@ fn db_out2(
     items: dcl::Items,
 ) -> Result<DatabaseChanges, substreams::errors::Error> {
     let mut database_changes: DatabaseChanges = Default::default();
-    log::info!("In db out nfts {:?}", nfts);
+    // log::info!("In db out nfts {:?}", nfts);
     db::transform_nfts_database_changes(&mut database_changes, nfts);
-    log::info!("In db out transfers {:?}", transfers);
+    // log::info!("In db out transfers {:?}", transfers);
     db::transform_transfers_database_changes(&mut database_changes, transfers);
-    log::info!("In db out collections {:?}", collections);
+    // log::info!("In db out collections {:?}", collections);
     db::transform_collection_database_changes(&mut database_changes, collections);
-    log::info!("In db out items {:?}", items);
+    // log::info!("In db out items {:?}", items);
     db::transform_item_database_changes(&mut database_changes, items);
     Ok(database_changes)
 }

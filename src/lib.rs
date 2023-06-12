@@ -7,6 +7,7 @@ mod utils;
 
 use hex_literal::hex;
 use pb::dcl;
+use std::collections::HashMap;
 use substreams::prelude::*;
 use substreams::scalar::BigInt;
 use substreams::{log, Hex};
@@ -221,34 +222,49 @@ pub fn map_collection_complete(
 // Reads the Marketplacev2 order creation by the `OrderCreated` event
 #[substreams::handlers::map]
 pub fn map_order_created(blk: eth::Block) -> Result<dcl::Orders, substreams::errors::Error> {
-    Ok(dcl::Orders {
-        orders: blk
-            .events::<abi::marketplacev2::events::OrderCreated>(&[&MARKETPLACEV2_CONTRACT])
-            .map(|(event, log)| {
-                substreams::log::info!("Order created {:?}", event);
-                dcl::Order {
-                    id: Hex(event.id).to_string(),
-                    marketplace_address: Hex(log.address()).to_string(),
-                    status: String::from(utils::orders::ORDER_OPEN),
-                    nft_id: format!("{}-{}", Hex(event.nft_address).to_string(), event.asset_id),
-                    token_id: Some(dcl::BigInt {
-                        value: event.asset_id.to_string(),
-                    }),
-                    price: Some(dcl::BigInt {
-                        value: event.price_in_wei.to_string(),
-                    }),
-                    buyer: Hex("").to_string(),
-                    expires_at: Some(dcl::BigInt {
-                        value: event.expires_at.to_string(),
-                    }),
-                    owner: Hex(event.seller).to_string(),
-                    tx_hash: Hex(log.receipt.transaction.hash.clone()).to_string(),
-                    block_number: blk.number,
-                    updated_at: blk.timestamp_seconds(),
-                }
-            })
-            .collect(),
-    })
+    let mut order_map: HashMap<String, dcl::Order> = HashMap::new();
+
+    blk.events::<abi::marketplacev2::events::OrderCreated>(&[&MARKETPLACEV2_CONTRACT])
+        .for_each(|(event, log)| {
+            substreams::log::info!("Order created {:?}", event);
+
+            let id = Hex(event.id).to_string();
+
+            // Check if the order already exists in the map
+            if let Some(_existing_order) = order_map.get_mut(&id) {
+                return; // Skip creating a new order with the same Id
+            }
+
+            let order = dcl::Order {
+                id: id.clone(),
+                marketplace_address: Hex(log.address()).to_string(),
+                status: String::from(utils::orders::ORDER_OPEN),
+                // TODO: add nft_address
+                // TODO: add item
+                nft_id: format!("{}-{}", Hex(event.nft_address).to_string(), event.asset_id),
+                token_id: Some(dcl::BigInt {
+                    value: event.asset_id.to_string(),
+                }),
+                price: Some(dcl::BigInt {
+                    value: event.price_in_wei.to_string(),
+                }),
+                buyer: Hex("").to_string(),
+                expires_at: Some(dcl::BigInt {
+                    value: event.expires_at.to_string(),
+                }),
+                owner: Hex(event.seller).to_string(),
+                tx_hash: Hex(log.receipt.transaction.hash.clone()).to_string(),
+                block_number: blk.number,
+                updated_at: blk.timestamp_seconds(),
+                // TODO: add created_at
+            };
+
+            order_map.insert(id, order);
+        });
+
+    let orders = order_map.values().cloned().collect();
+
+    Ok(dcl::Orders { orders })
 }
 
 /// Store addresses of the orders by nft_id created by map_order_created
@@ -327,28 +343,28 @@ fn db_out(
 ) -> Result<DatabaseChanges, substreams::errors::Error> {
     let mut database_changes: DatabaseChanges = Default::default();
     log::info!("In db out collections {:?}", collections);
-    db::transform_collection_database_changes(&mut database_changes, collections);
+    db::collections::transform_collection_database_changes(&mut database_changes, collections);
     log::info!("In db out items {:?}", items);
-    db::transform_item_database_changes(&mut database_changes, items);
+    db::items::transform_item_database_changes(&mut database_changes, items);
     log::info!("In db out nfts {:?}", nfts);
-    db::transform_nfts_database_changes(&mut database_changes, nfts);
+    db::nfts::transform_nfts_database_changes(&mut database_changes, nfts);
     log::info!("In db out orders {:?}", orders);
-    db::transform_orders_database_changes(&mut database_changes, orders.clone());
+    db::orders::transform_orders_database_changes(&mut database_changes, orders.clone());
     //@TODO move this to a fn to keep db_out clean
     if !orders.orders.is_empty() {
         for order in orders.orders {
             match orders_store.get_first(order.nft_id) {
                 Some(active_order) => {
                     log::info!("There's an active order in the store {:?}", active_order);
-                    db::cancel_nft_order(&mut database_changes, active_order)
+                    db::orders::cancel_nft_order(&mut database_changes, active_order)
                 }
                 None => continue,
             }
         }
     }
     log::info!("In db out orders_executed {:?}", orders_executed);
-    db::transform_orders_status_database_changes(&mut database_changes, orders_executed);
+    db::orders::transform_orders_status_database_changes(&mut database_changes, orders_executed);
     log::info!("In db out orders_cancelled {:?}", orders_cancelled);
-    db::transform_orders_status_database_changes(&mut database_changes, orders_cancelled);
+    db::orders::transform_orders_status_database_changes(&mut database_changes, orders_cancelled);
     Ok(database_changes)
 }

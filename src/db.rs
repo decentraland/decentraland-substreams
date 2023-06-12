@@ -208,3 +208,35 @@ pub fn transform_item_database_changes(changes: &mut DatabaseChanges, items: dcl
             .change("collection_id", (None, dcl_hex!(item.collection_id)));
     }
 }
+
+pub fn transform_transfers_database_changes(
+    changes: &mut DatabaseChanges,
+    transfers: dcl::Transfers,
+) {
+    for transfer in transfers.transfers {
+        changes
+            .push_change(
+                String::from("transfers"),
+                dcl_hex!(format!(
+                    "{}-{}",
+                    transfer.tx_hash.clone(),
+                    transfer.log_index
+                )),
+                0,
+                table_change::Operation::Create,
+            )
+            .change("collection_id", (None, dcl_hex!(transfer.collection_id)))
+            .change(
+                "token_id",
+                (
+                    None,
+                    BigInt::from(transfer.token_id.unwrap_or(dcl::BigInt {
+                        value: String::from("0"),
+                    })),
+                ),
+            )
+            .change("block_timestamp", (None, transfer.block_timestamp))
+            .change("from_address", (None, dcl_hex!(transfer.from)))
+            .change("to_address", (None, dcl_hex!(transfer.to)));
+    }
+}

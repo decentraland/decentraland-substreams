@@ -19,11 +19,29 @@ binaries:
 modules:
   - name: map_collection_created
     kind: map
-    initialBlock: 15202000 # This is the when the first collection was created
+    initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:dcl.Collections
+  
+  - name: map_collection_complete
+    kind: map
+    initialBlock: 15202000
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - map: map_collection_created # depends on the map and not store because the complete happens in the same block as the ProxyCreated event, so the store won't have the address yet
+    output:
+      type: proto:dcl.Items
+
+  - name: map_add_items
+    kind: map
+    initialBlock: 15202000
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - map: map_collection_created # depends on the map and not store because the AddItem happens in the same block as the ProxyCreated event, so the store won't have the address yet
+    output:
+      type: proto:dcl.Items
 
   - name: store_collections
     kind: store
@@ -42,57 +60,6 @@ modules:
     output:
       type: proto:dcl.NFTs
 
-  - name: map_add_items
-    kind: map
-    initialBlock: 15202000
-    inputs:
-      - source: sf.ethereum.type.v2.Block
-      - map: map_collection_created # depends on the map and not store because the AddItem happens in the same block as the ProxyCreated event, so the store won't have the address yet
-    output:
-      type: proto:dcl.Items
-
-  - name: map_collection_complete
-    kind: map
-    initialBlock: 15202000
-    inputs:
-      - source: sf.ethereum.type.v2.Block
-      - map: map_collection_created # depends on the map and not store because the complete happens in the same block as the ProxyCreated event, so the store won't have the address yet
-    output:
-      type: proto:dcl.Items
-
-  # Orders
-  - name: map_order_created
-    kind: map
-    initialBlock: 15202000
-    inputs:
-      - source: sf.ethereum.type.v2.Block
-    output:
-      type: proto:dcl.Orders
-
-  - name: store_orders
-    kind: store
-    initialBlock: 15202000
-    updatePolicy: set
-    valueType: string
-    inputs:
-      - map: map_order_created
-
-  - name: map_order_executed
-    kind: map
-    initialBlock: 15202000
-    inputs:
-      - source: sf.ethereum.type.v2.Block
-    output:
-      type: proto:dcl.Orders
-
-  - name: map_order_cancelled
-    kind: map
-    initialBlock: 15202000
-    inputs:
-      - source: sf.ethereum.type.v2.Block
-    output:
-      type: proto:dcl.Orders
-  
   - name: map_transfers
     kind: map
     initialBlock: 15202000
@@ -101,18 +68,14 @@ modules:
       - store: store_collections
     output:
       type: proto:dcl.Transfers
-
-  - name: db_out
+      
+  - name: db_out2
     initialBlock: 15202000
     kind: map
     inputs:
+      - map: map_issues
+      - map: map_transfers
       - map: map_collection_created
       - map: map_add_items
-      - map: map_issues
-      - map: map_order_created
-      - map: map_order_executed
-      - map: map_order_cancelled
-      - map: map_transfers
-      - store: store_orders
     output:
       type: proto:sf.substreams.sink.database.v1.DatabaseChanges

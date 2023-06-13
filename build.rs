@@ -21,6 +21,11 @@ fn main() -> Result<(), anyhow::Error> {
     Abigen::new("CollectionFactoryV3", "abi/CollectionFactoryV3.json")?
         .generate()?
         .write_to_file("src/abi/collectionFactoryv3.rs")?;
+    
+    // CollectionFactory contract
+    Abigen::new("CollectionFactory", "abi/CollectionFactory.json")?
+        .generate()?
+        .write_to_file("src/abi/collectionFactory.rs")?;
 
     Ok(())
 }

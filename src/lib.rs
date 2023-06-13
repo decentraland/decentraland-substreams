@@ -1,10 +1,12 @@
 mod abi;
+mod data;
 mod db;
 mod macros;
 mod pb;
 mod rpc;
 mod utils;
 
+use data::wearables_v1::constants;
 use hex_literal::hex;
 use pb::dcl;
 use std::collections::HashMap;
@@ -24,6 +26,42 @@ const COLLECTIONS_FACTORY: [u8; 20] = hex!("B549B2442b2BD0a53795BC5cDcBFE0cAF7AC
 const COLLECTIONS_V3_FACTORY: [u8; 20] = hex!("3195e88aE10704b359764CB38e429D24f1c2f781");
 
 substreams_ethereum::init!();
+
+// Workaround for Collections in Ethereum
+#[substreams::handlers::map]
+pub fn map_collection_created_ethereum(
+    blk: eth::Block,
+) -> Result<dcl::Collections, substreams::errors::Error> {
+    Ok(dcl::Collections {
+        collections: blk
+            .events::<abi::collection_factory::events::OwnershipTransferred>(
+                constants::COLLECTIONS_MAINNET,
+            )
+            .map(|(event, log)| {
+                let collection_address = Hex(log.address()).to_string();
+                substreams::log::info!(
+                    "OwnerTransferred event {:?} {:?}",
+                    event,
+                    collection_address
+                );
+                substreams::log::info!("at block {:?}", blk.number);
+
+                let collection_data = rpc::collection_data_call(log.address().to_vec());
+                dcl::Collection {
+                    // address: Hex(event.address).to_string(),
+                    creator: collection_data.0,
+                    is_approved: collection_data.1,
+                    name: collection_data.2,
+                    symbol: collection_data.3,
+                    owner: collection_data.4,
+                    is_completed: collection_data.5,
+                    created_at: blk.timestamp_seconds(),
+                    address: collection_address,
+                }
+            })
+            .collect(),
+    })
+}
 
 // Reads the collection creation by the `ProxyCreated` event
 #[substreams::handlers::map]

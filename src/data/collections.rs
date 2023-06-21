@@ -1,3 +1,5 @@
+use crate::pb::dcl::{Item, ItemType, Metadata, Wearable};
+
 use super::wearables_v1::*;
 
 const all_collections: Vec<Vec<wearable::Wearable>> = vec![
@@ -60,28 +62,30 @@ pub fn find_wearable<'a>(
     None
 }
 
-fn build_wearable_v1(item: Item, representation: WearableRepresentation) -> Wearable {
-    let wearable = wearable::Wearable::new(
-        representation.id,
-        representation.name,
-        representation.description,
-        representation.category,
-        representation.rarity,
-        representation.body_shapes,
-    );
+fn build_wearable_v1(item: Item, representation: wearable::Wearable) -> Wearable {
+    let wearable = Wearable {
+        id: representation.id,
+        name: representation.name,
+        description: representation.description,
+        collection: item.collection,
+        category: representation.category,
+        rarity: representation.rarity,
+        body_shapes: representation.body_shapes,
+    };
 
     wearable
 }
 
-fn build_wearable_v1_metadata(item: Item, representation: WearableRepresentation) -> Metadata {
-    let mut metadata = Metadata::new(representation.id);
-
+fn build_wearable_v1_metadata(item: Item, representation: wearable::Wearable) -> Metadata {
     let wearable = build_wearable_v1(item, representation);
-
-    metadata.item_type = item_types::WEARABLE_V1;
-    metadata.wearable = wearable.id;
-
-    metadata.save();
+    let mut metadata = Metadata {
+        id: representation.id,
+        item_type: ItemType::WearableV1,
+        wearable: Some(wearable),
+        // wearable: wearable.id,
+        emote: None,
+    };
+    // let mut metadata = Metadata::new(representation.id);
 
     metadata
 }

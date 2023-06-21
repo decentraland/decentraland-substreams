@@ -256,7 +256,7 @@ pub fn map_add_items_v1(
                     }),
                     beneficiary: Hex(constants::ZERO_ADDRESS).to_string(),
                     metadata: metadata.clone(),
-                    content_hash,
+                    // content_hash: None,
                     blockchain_item_id: Some(add_item_event.item_id.into()),
                     collection_id: Hex(log.address()).to_string(),
                     created_at: blk.timestamp_seconds(),

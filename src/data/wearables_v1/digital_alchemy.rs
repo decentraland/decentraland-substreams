@@ -1,3 +1,5 @@
+use super::wearable::Wearable;
+
 pub const digital_alchemy: Vec<Wearable> = vec![
 
 Wearable::new(

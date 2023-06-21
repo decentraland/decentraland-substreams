@@ -1,3 +1,5 @@
+use super::wearable::Wearable;
+
 pub const ethermon_wearables: Vec<Wearable> = vec![
   Wearable::new(
     String::from("ethermon_feet "),

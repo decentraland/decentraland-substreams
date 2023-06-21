@@ -1,3 +1,5 @@
+use super::wearable::Wearable;
+
 pub const dg_fall_2020: Vec<Wearable> = vec![
     Wearable::new(
         String::from("dg_money_shades_eyewear "),

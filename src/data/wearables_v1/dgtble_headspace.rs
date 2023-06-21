@@ -1,3 +1,5 @@
+use super::wearable::Wearable;
+
 pub const dgtble_headspace: Vec<Wearable> = vec![
   Wearable::new(
     String::from("dgtble_rainbow_grid_shoes_feet "),
@@ -49,4 +51,3 @@ Wearable::new(
 )
 
 ];
-

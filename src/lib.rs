@@ -239,17 +239,21 @@ pub fn map_add_items_v1(
             .events::<abi::ERC721::events::AddWearable>(collections_v1::COLLECTIONS_GOERLI_HEX)
             .map(|(add_item_event, log)| {
                 let item = add_item_event.wearable_id;
-                let representation = data::collections::find_wearable(&item);
+                let representation = data::collections::find_wearable(&item).unwrap();
                 // sanitize_sql_string(metadata.clone());
                 dcl::Item {
                     id: utils::get_item_id(
                         Hex(log.address()).to_string(),
                         add_item_event.item_id.to_string(),
                     ),
-                    rarity,
-                    max_supply: Some(max_supply.into()),
-                    total_supply: Some(total_supply.into()),
-                    price: Some(price.into()),
+                    rarity: representation.rarity,
+                    max_supply: Some(add_item_event.max_issuance.into()),
+                    total_supply: Some(dcl::BigInt {
+                        value: "0".to_string(),
+                    }),
+                    price: Some(dcl::BigInt {
+                        value: "0".to_string(),
+                    }),
                     beneficiary: Hex(constants::ZERO_ADDRESS).to_string(),
                     metadata: metadata.clone(),
                     content_hash,

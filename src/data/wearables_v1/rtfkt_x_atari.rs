@@ -1,18 +1,20 @@
+use super::wearable::Wearable;
+
 pub const rtfkt_x_atari: Vec<Wearable> = vec![
     Wearable {
-        id: "p_rtfkt_x_atari_feet "),
-        name: "Purple RTFKT X Atari Sneakers "),
-        description: "RTFKT x Atari sneakers with holographic print. "),
-        category: "feet "),
-        rarity: "epic "),
-        gender: vec!["BaseMale "), "BaseFemale"],
+        id: String::from("p_rtfkt_x_atari_feet "),
+        name: String::from("Purple RTFKT X Atari Sneakers "),
+        description: String::from("RTFKT x Atari sneakers with holographic print. "),
+        category: String::from("feet "),
+        rarity: String::from("epic "),
+        body_shapes: vec![String::from("BaseMale"), String::from("BaseFemale")],
     },
     Wearable {
-        id: "r_rtfkt_x_atari_feet "),
-        name: "Red RTFKT X Atari Sneakers "),
-        description: "Unique RTFKT x Atari sneakers in red. "),
-        category: "feet "),
-        rarity: "unique "),
-        gender: vec!["BaseMale "), "BaseFemale"],
+        id: String::from("r_rtfkt_x_atari_feet "),
+        name: String::from("Red RTFKT X Atari Sneakers "),
+        description: String::from("Unique RTFKT x Atari sneakers in red. "),
+        category: String::from("feet "),
+        rarity: String::from("unique "),
+        body_shapes: vec![String::from("BaseMale"), String::from("BaseFemale")],
     },
 ];

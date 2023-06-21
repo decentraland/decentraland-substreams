@@ -1,3 +1,5 @@
+use super::wearable::Wearable;
+
 pub const exclusive_masks: Vec<Wearable> = vec![
     Wearable::new(
         String::from("bird_mask "),

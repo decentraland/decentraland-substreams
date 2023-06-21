@@ -1,34 +1,44 @@
+use super::wearable::Wearable;
+
 pub const meme_dontbuythis: Vec<Wearable> = vec![
     Wearable {
-        id: "meme_helmet_pineapple "),
-        name: "Tasty Pineapple Head "),
-        description: "Tasty Pineapple Head from the $Meme Collection - Don't wear this "),
-        category: "helmet "),
-        rarity: "epic "),
-        gender: vec!["BaseMale "), "BaseFemale"],
+        id: String::from("meme_helmet_pineapple "),
+        name: String::from("Tasty Pineapple Head "),
+        description: String::from(
+            "Tasty Pineapple Head from the $Meme Collection - Don't wear this ",
+        ),
+        category: String::from("helmet "),
+        rarity: String::from("epic "),
+        body_shapes: vec![String::from("BaseMale"), String::from("BaseFemale")],
     },
     Wearable {
-        id: "meme_pants_pineapple "),
-        name: "Fresh Pineapple Pants "),
-        description: "Fresh Pineapple Pants from the $Meme collection - Don't wear this "),
-        category: "lower_body "),
-        rarity: "epic "),
-        gender: vec!["BaseMale "), "BaseFemale"],
+        id: String::from("meme_pants_pineapple "),
+        name: String::from("Fresh Pineapple Pants "),
+        description: String::from(
+            "Fresh Pineapple Pants from the $Meme collection - Don't wear this ",
+        ),
+        category: String::from("lower_body "),
+        rarity: String::from("epic "),
+        body_shapes: vec![String::from("BaseMale"), String::from("BaseFemale")],
     },
     Wearable {
-        id: "meme_suit_pineapple_onesie "),
-        name: "Sweet Pineapple Onesie "),
-        description: "Sweet Pineapple Onesie from the $Meme collection - Don't wear this "),
-        category: "upper_body "),
-        rarity: "epic "),
-        gender: vec!["BaseMale "), "BaseFemale"],
+        id: String::from("meme_suit_pineapple_onesie "),
+        name: String::from("Sweet Pineapple Onesie "),
+        description: String::from(
+            "Sweet Pineapple Onesie from the $Meme collection - Don't wear this ",
+        ),
+        category: String::from("upper_body "),
+        rarity: String::from("epic "),
+        body_shapes: vec![String::from("BaseMale"), String::from("BaseFemale")],
     },
     Wearable {
-        id: "meme_suit_pineapple "),
-        name: "Cool Pineapple Suit "),
-        description: "Cool Pineapple Suit from the $Meme collection - Don't wear this "),
-        category: "upper_body "),
-        rarity: "epic "),
-        gender: vec!["BaseMale "), "BaseFemale"],
+        id: String::from("meme_suit_pineapple "),
+        name: String::from("Cool Pineapple Suit "),
+        description: String::from(
+            "Cool Pineapple Suit from the $Meme collection - Don't wear this ",
+        ),
+        category: String::from("upper_body "),
+        rarity: String::from("epic "),
+        body_shapes: vec![String::from("BaseMale"), String::from("BaseFemale")],
     },
 ];

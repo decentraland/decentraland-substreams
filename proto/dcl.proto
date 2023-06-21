@@ -81,3 +81,84 @@ message Order {
     uint64 updated_at = 12;
 }
 
+
+message Metadata {
+  string id = 1;
+  ItemType item_type = 2;
+  Wearable wearable = 3;
+  Emote emote = 4;
+}
+
+enum ItemType {
+  UNDEFINED = 0;
+  WEARABLE_V1 = 1;
+  WEARABLE_V2 = 2;
+  SMART_WEARABLE_V1 = 3;
+  EMOTE_V1 = 4;
+}
+
+message Wearable {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string collection = 4;
+  WearableCategory category = 5;
+  WearableRarity rarity = 6;
+  repeated WearableBodyShape body_shapes = 7;
+}
+
+message Emote {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string collection = 4;
+  EmoteCategory category = 5;
+  bool loop = 6;
+  WearableRarity rarity = 7;
+  repeated WearableBodyShape body_shapes = 8;
+}
+
+enum WearableCategory {
+  EYEBROWS = 0;
+  EYES = 1;
+  FACIAL_HAIR = 2;
+  HAIR = 3;
+  MOUTH = 4;
+  UPPER_BODY = 5;
+  LOWER_BODY = 6;
+  FEET = 7;
+  EARRING = 8;
+  EYEWEAR = 9;
+  HAT = 10;
+  HELMET = 11;
+  MASK = 12;
+  TIARA = 13;
+  TOP_HEAD = 14;
+  SKIN = 15;
+}
+
+enum EmoteCategory {
+  DANCE = 0;
+  STUNT = 1;
+  GREETINGS = 2;
+  FUN = 3;
+  POSES = 4;
+  REACTIONS = 5;
+  HORROR = 6;
+  MISCELLANEOUS = 7;
+}
+
+enum WearableRarity {
+  COMMON = 0;
+  UNCOMMON = 1;
+  RARE = 2;
+  EPIC = 3;
+  LEGENDARY = 4;
+  MYTHIC = 5;
+  UNIQUE = 6;
+}
+
+enum WearableBodyShape {
+  BASE_FEMALE = 0;
+  BASE_MALE = 1;
+}

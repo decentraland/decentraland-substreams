@@ -1,4 +1,5 @@
 mod abi;
+mod constants;
 mod data;
 mod db;
 mod macros;
@@ -6,7 +7,7 @@ mod pb;
 mod rpc;
 mod utils;
 
-use data::wearables_v1::constants;
+use data::constants::collections_v1;
 use hex_literal::hex;
 use pb::dcl;
 use std::collections::HashMap;
@@ -27,16 +28,12 @@ const COLLECTIONS_V3_FACTORY: [u8; 20] = hex!("3195e88aE10704b359764CB38e429D24f
 
 substreams_ethereum::init!();
 
-// Workaround for Collections in Ethereum
-#[substreams::handlers::map]
-pub fn map_collection_created_ethereum(
-    blk: eth::Block,
-) -> Result<dcl::Collections, substreams::errors::Error> {
-    Ok(dcl::Collections {
+/////// ---- COLLECTIONS  V1 ----- ///////
+
+pub fn map_collections_v1(blk: eth::Block, contract_addresses: &[&[u8]]) -> pb::dcl::Collections {
+    dcl::Collections {
         collections: blk
-            .events::<abi::collection_factory::events::OwnershipTransferred>(
-                constants::COLLECTIONS_MAINNET,
-            )
+            .events::<abi::collection_factory::events::OwnershipTransferred>(contract_addresses)
             .map(|(event, log)| {
                 let collection_address = Hex(log.address()).to_string();
                 substreams::log::info!(
@@ -49,19 +46,92 @@ pub fn map_collection_created_ethereum(
                 let collection_data = rpc::collection_data_call(log.address().to_vec());
                 dcl::Collection {
                     // address: Hex(event.address).to_string(),
+                    address: collection_address.clone(),
+                    owner: collection_data.4,
                     creator: collection_data.0,
-                    is_approved: collection_data.1,
                     name: collection_data.2,
                     symbol: collection_data.3,
-                    owner: collection_data.4,
                     is_completed: collection_data.5,
+                    is_approved: collection_data.1,
+                    is_editable: collection_data.6,
+                    minters: ["123".to_string()].to_vec(),
+                    managers: ["123".to_string()].to_vec(),
+                    urn: utils::urn::get_urn_for_collection_v2(
+                        collection_address,
+                        "goerli".to_string(),
+                    ),
                     created_at: blk.timestamp_seconds(),
-                    address: collection_address,
+                    reviewed_at: blk.timestamp_seconds(),
+                    first_listed_at: None,
+                    search_is_store_minter: false,
                 }
             })
             .collect(),
-    })
+    }
 }
+
+// Store addresses of the collections created by map_collection_created
+#[substreams::handlers::store]
+pub fn store_collections_v1_count(collections: dcl::Collections, store: StoreAddInt64) {
+    for _collection in collections.collections {
+        store.add(0, "count", 1); // we don't really care about the value, we'll just check if the key is present in the store
+    }
+}
+
+// Workaround for Collections in Ethereum Goerli
+#[substreams::handlers::map]
+pub fn map_collection_created_ethereum_goerli(
+    blk: eth::Block,
+    // collections_v1_store: substreams::store::StoreGetString,
+) -> Result<dcl::Collections, substreams::errors::Error> {
+    Ok(map_collections_v1(
+        blk,
+        collections_v1::FIRST_COLLECTION_CREATED_GOERLI,
+        // &[collections_v1::COLLECTIONS_GOERLI[0].as_bytes()],
+    ))
+    // let global = GLOBAL_VARIABLE.lock().unwrap();
+    // substreams::log::info!("global {:?}", global);
+    // if *global == 0 {
+    //     Ok(map_collections_v1(
+    //         blk,
+    //         collections_v1::COLLECTIONS_GOERLI,
+    //         // &[collections_v1::COLLECTIONS_GOERLI[0].as_bytes()],
+    //     ))
+    // } else {
+    //     Ok(dcl::Collections {
+    //         collections: vec![],
+    //     })
+    // }
+
+    // if let None = collections_v1_store.get_last(collections_v1::COLLECTIONS_GOERLI[0]) {
+    // Ok(map_collections_v1(
+    //     blk,
+    //     &[collections_v1::COLLECTIONS_GOERLI[0].as_bytes()],
+    // ))
+    // } else {
+    //     Ok(dcl::Collections {
+    //         collections: vec![],
+    //     })
+    // }
+}
+
+// // Workaround for Collections in Ethereum Mainnet
+// #[substreams::handlers::map]
+// pub fn map_collection_created_ethereum_mainnet(
+//     blk: eth::Block,
+//     collections_v1_store: substreams::store::StoreGetString,
+// ) -> Result<dcl::Collections, substreams::errors::Error> {
+//     if let None = collections_v1_store.get_last(collections_v1::COLLECTIONS_MAINNET[0]) {
+//         Ok(map_collections_v1(
+//             blk,
+//             &[collections_v1::COLLECTIONS_MAINNET[0].as_bytes()],
+//         ))
+//     } else {
+//         Ok(dcl::Collections {
+//             collections: vec![],
+//         })
+//     }
+// }
 
 // Reads the collection creation by the `ProxyCreated` event
 #[substreams::handlers::map]
@@ -78,14 +148,31 @@ pub fn map_collection_created(
                 substreams::log::info!("Collection created {:?}", event);
                 let collection_data = rpc::collection_data_call(event.address.clone()); //@TODO avoid clone?
                 dcl::Collection {
-                    address: Hex(event.address).to_string(),
+                    address: Hex(event.address.clone()).to_string(),
+                    // creator: collection_data.0,
+                    // is_approved: collection_data.1,
+                    // name: collection_data.2,
+                    // symbol: collection_data.3,
+                    // owner: collection_data.4,
+                    // is_completed: collection_data.5,
+                    // created_at: blk.timestamp_seconds(),
+                    owner: collection_data.4,
                     creator: collection_data.0,
-                    is_approved: collection_data.1,
                     name: collection_data.2,
                     symbol: collection_data.3,
-                    owner: collection_data.4,
                     is_completed: collection_data.5,
+                    is_approved: collection_data.1,
+                    is_editable: collection_data.6,
+                    minters: [].to_vec(),
+                    managers: [].to_vec(),
+                    urn: utils::urn::get_urn_for_collection_v2(
+                        Hex(event.address).to_string(),
+                        "polygon".to_string(),
+                    ),
                     created_at: blk.timestamp_seconds(),
+                    reviewed_at: blk.timestamp_seconds(),
+                    first_listed_at: None,
+                    search_is_store_minter: false,
                 }
             })
             .collect(),
@@ -139,6 +226,44 @@ pub fn map_issues(
     }
     Ok(dcl::NfTs { nfts })
 }
+
+/////// ---- ITEMS V1 ----- ///////
+
+#[substreams::handlers::map]
+pub fn map_add_items_v1(
+    blk: eth::Block,
+    collections: dcl::Collections,
+) -> Result<dcl::Items, substreams::errors::Error> {
+    Ok(dcl::Items {
+        items: blk
+            .events::<abi::ERC721::events::AddWearable>(collections_v1::COLLECTIONS_GOERLI_HEX)
+            .map(|(add_item_event, log)| {
+                let item = add_item_event.wearable_id;
+                let representation = data::collections::find_wearable(&item);
+                // sanitize_sql_string(metadata.clone());
+                dcl::Item {
+                    id: utils::get_item_id(
+                        Hex(log.address()).to_string(),
+                        add_item_event.item_id.to_string(),
+                    ),
+                    rarity,
+                    max_supply: Some(max_supply.into()),
+                    total_supply: Some(total_supply.into()),
+                    price: Some(price.into()),
+                    beneficiary: Hex(constants::ZERO_ADDRESS).to_string(),
+                    metadata: metadata.clone(),
+                    content_hash,
+                    blockchain_item_id: Some(add_item_event.item_id.into()),
+                    collection_id: Hex(log.address()).to_string(),
+                    created_at: blk.timestamp_seconds(),
+                    item_type: utils::items::build_item_metadata(metadata).item_type,
+                }
+            })
+            .collect(),
+    })
+}
+
+/////// ---- ITEMS V2 ----- ///////
 
 /// Reads item creationg by the `AddItem` event
 #[substreams::handlers::map]
@@ -370,7 +495,7 @@ pub fn map_order_cancelled(blk: eth::Block) -> Result<dcl::Orders, substreams::e
 }
 
 #[substreams::handlers::map]
-fn db_out(
+fn db_out_polygon(
     collections: dcl::Collections,
     items: dcl::Items,
     nfts: dcl::NfTs,
@@ -381,6 +506,7 @@ fn db_out(
 ) -> Result<DatabaseChanges, substreams::errors::Error> {
     let mut database_changes: DatabaseChanges = Default::default();
     log::info!("In db out collections {:?}", collections);
+
     db::collections::transform_collection_database_changes(&mut database_changes, collections);
     log::info!("In db out items {:?}", items);
     db::items::transform_item_database_changes(&mut database_changes, items);
@@ -406,3 +532,89 @@ fn db_out(
     db::orders::transform_orders_status_database_changes(&mut database_changes, orders_cancelled);
     Ok(database_changes)
 }
+
+fn initiate_v1_collections() -> Vec<dcl::Collection> {
+    let mut collections: Vec<dcl::Collection> = Vec::new();
+    let all_collections_addresses = collections_v1::COLLECTIONS_GOERLI;
+    for collection in all_collections_addresses {
+        let collection_data = rpc::collection_data_call(collection.as_bytes().to_vec());
+
+        collections.push(dcl::Collection {
+            // address: Hex(event.address).to_string(),
+            address: collection.to_string(),
+            owner: collection_data.4,
+            creator: collection_data.0,
+            name: collection_data.2,
+            symbol: collection_data.3,
+            is_completed: collection_data.5,
+            is_approved: collection_data.1,
+            is_editable: collection_data.6,
+            minters: ["123".to_string()].to_vec(),
+            managers: ["123".to_string()].to_vec(),
+            urn: utils::urn::get_urn_for_collection_v2(
+                collection.to_string(),
+                "goerli".to_string(),
+            ),
+            created_at: blk.timestamp_seconds(),
+            reviewed_at: blk.timestamp_seconds(),
+            first_listed_at: None,
+            search_is_store_minter: false,
+        })
+    }
+    collections
+}
+
+#[substreams::handlers::map]
+fn db_out(
+    collections: dcl::Collections,
+    items: dcl::Items,
+    nfts: dcl::NfTs,
+    orders: dcl::Orders,
+    orders_executed: dcl::Orders,
+    orders_cancelled: dcl::Orders,
+    orders_store: substreams::store::StoreGetString,
+    collections_v1_goerli_store: substreams::store::StoreGetInt64,
+) -> Result<DatabaseChanges, substreams::errors::Error> {
+    let mut database_changes: DatabaseChanges = Default::default();
+    log::info!("In db out collections {:?}", collections);
+    let count = collections_v1_goerli_store.get_at(0, "count".to_string());
+    log::info!("In db out count {:?}", count);
+    if count == Some(1) {
+        // we got the first collection created, now add the rest programmatically
+        let rest_of_collections = initiate_v1_collections();
+        db::collections::transform_collection_database_changes(&mut database_changes, collections);
+    }
+    log::info!("In db out items {:?}", items);
+    db::items::transform_item_database_changes(&mut database_changes, items);
+    log::info!("In db out nfts {:?}", nfts);
+    db::nfts::transform_nfts_database_changes(&mut database_changes, nfts);
+    log::info!("In db out orders {:?}", orders);
+    db::orders::transform_orders_database_changes(&mut database_changes, orders.clone());
+    //@TODO move this to a fn to keep db_out clean
+    if !orders.orders.is_empty() {
+        for order in orders.orders {
+            match orders_store.get_first(order.nft_id) {
+                Some(active_order) => {
+                    log::info!("There's an active order in the store {:?}", active_order);
+                    db::orders::cancel_nft_order(&mut database_changes, active_order)
+                }
+                None => continue,
+            }
+        }
+    }
+    log::info!("In db out orders_executed {:?}", orders_executed);
+    db::orders::transform_orders_status_database_changes(&mut database_changes, orders_executed);
+    log::info!("In db out orders_cancelled {:?}", orders_cancelled);
+    db::orders::transform_orders_status_database_changes(&mut database_changes, orders_cancelled);
+    Ok(database_changes)
+}
+
+// #[substreams::handlers::map]
+// fn db_out_ethereum_goerli(
+//     collections: dcl::Collections,
+// ) -> Result<DatabaseChanges, substreams::errors::Error> {
+//     let mut database_changes: DatabaseChanges = Default::default();
+//     log::info!("In db out collections {:?}", collections);
+//     db::collections::transform_collection_database_changes(&mut database_changes, collections);
+//     Ok(database_changes)
+// }

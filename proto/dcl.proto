@@ -37,7 +37,14 @@ message Collection {
     string owner = 5;
     bool is_completed = 6;
     bool is_approved = 7;
-    uint64 created_at = 8;
+    bool is_editable = 8;
+    repeated string minters = 9;
+    repeated string managers = 10;
+    string urn = 11;
+    uint64 created_at = 12;
+    uint64 reviewed_at = 13;
+    optional uint64 first_listed_at = 14;
+    bool search_is_store_minter = 15;
 }
 
 message NFTs {

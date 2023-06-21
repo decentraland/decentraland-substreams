@@ -3,7 +3,7 @@ use substreams::{scalar::BigInt, Hex};
 use substreams_ethereum::rpc::RpcBatch;
 
 // (Creator, is_approved, Name, Symbol, Owner, is_complete, is_editable, itemsCount )
-pub type CollectionDataTuple = (String, bool, String, String, String, bool);
+pub type CollectionDataTuple = (String, bool, String, String, String, bool, bool);
 
 pub fn collection_data_call(collection_address: Vec<u8>) -> CollectionDataTuple {
     // using RpcBatch since it will fetch more data in a batch later on
@@ -33,7 +33,7 @@ pub fn collection_data_call(collection_address: Vec<u8>) -> CollectionDataTuple 
             collection_address.clone(),
         )
         .add(
-            abi::collections_v2::functions::IsApproved {},
+            abi::collections_v2::functions::IsEditable {},
             collection_address,
         )
         .execute()
@@ -63,6 +63,10 @@ pub fn collection_data_call(collection_address: Vec<u8>) -> CollectionDataTuple 
                 &responses.responses[5],
             )
             .unwrap_or(false);
+            let is_editable = RpcBatch::decode::<_, abi::collections_v2::functions::IsEditable>(
+                &responses.responses[6],
+            )
+            .unwrap_or(false);
 
             (
                 Hex(creator).to_string(),
@@ -71,6 +75,7 @@ pub fn collection_data_call(collection_address: Vec<u8>) -> CollectionDataTuple 
                 symbol,
                 Hex(owner).to_string(),
                 is_completed,
+                is_editable,
             )
         }
         Err(_err) => (
@@ -79,6 +84,7 @@ pub fn collection_data_call(collection_address: Vec<u8>) -> CollectionDataTuple 
             String::from(""),
             String::from(""),
             String::from(""),
+            false,
             false,
         ),
     }

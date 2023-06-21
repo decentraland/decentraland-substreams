@@ -17,17 +17,9 @@ binaries:
     file: ./target/wasm32-unknown-unknown/release/substreams.wasm
 
 modules:
-  - name: map_collection_created_ethereum
-    kind: map
-    initialBlock: 7103734
-    inputs:
-      - source: sf.ethereum.type.v2.Block
-    output:
-      type: proto:dcl.Collections
-
   - name: map_collection_created
     kind: map
-    initialBlock: 28229316 # This is the when the first collection was created
+    initialBlock: 28121692 # This is the when the first collection was created
     inputs:
       - source: sf.ethereum.type.v2.Block
     output:
@@ -35,7 +27,7 @@ modules:
 
   - name: store_collections
     kind: store
-    initialBlock: 28229316
+    initialBlock: 28121692
     updatePolicy: set
     valueType: string
     inputs:
@@ -43,7 +35,7 @@ modules:
 
   - name: map_issues
     kind: map
-    initialBlock: 28229316
+    initialBlock: 28121692
     inputs:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections
@@ -52,7 +44,7 @@ modules:
 
   - name: map_add_items
     kind: map
-    initialBlock: 28229316
+    initialBlock: 28121692
     inputs:
       - source: sf.ethereum.type.v2.Block
       - map: map_collection_created # depends on the map and not store because the AddItem happens in the same block as the ProxyCreated event, so the store won't have the address yet
@@ -61,7 +53,7 @@ modules:
 
   - name: map_collection_complete
     kind: map
-    initialBlock: 28229316
+    initialBlock: 28121692
     inputs:
       - source: sf.ethereum.type.v2.Block
       - map: map_collection_created # depends on the map and not store because the complete happens in the same block as the ProxyCreated event, so the store won't have the address yet
@@ -71,7 +63,7 @@ modules:
   # Orders
   - name: map_order_created
     kind: map
-    initialBlock: 28229316
+    initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
     output:
@@ -79,7 +71,7 @@ modules:
 
   - name: store_orders
     kind: store
-    initialBlock: 28229316
+    initialBlock: 15202000
     updatePolicy: set
     valueType: string
     inputs:
@@ -87,7 +79,7 @@ modules:
 
   - name: map_order_executed
     kind: map
-    initialBlock: 28229316
+    initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
     output:
@@ -95,14 +87,14 @@ modules:
 
   - name: map_order_cancelled
     kind: map
-    initialBlock: 28229316
+    initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:dcl.Orders
 
-  - name: db_out_polygon
-    initialBlock: 28229316
+  - name: db_out
+    initialBlock: 15202000
     kind: map
     inputs:
       - map: map_collection_created
@@ -112,33 +104,5 @@ modules:
       - map: map_order_executed
       - map: map_order_cancelled
       - store: store_orders
-    output:
-      type: proto:sf.substreams.sink.database.v1.DatabaseChanges
-
-  - name: db_out_ethereum_mainnet
-    initialBlock: 8828687
-    kind: map
-    inputs:
-      - map: map_collection_created
-      - map: map_add_items
-      - map: map_issues
-      - map: map_order_created
-      - map: map_order_executed
-      - map: map_order_cancelled
-      - store: store_orders
-    output:
-      type: proto:sf.substreams.sink.database.v1.DatabaseChanges
-
-  - name: db_out_ethereum_goerli
-    initialBlock: 7103734
-    kind: map
-    inputs:
-      - map: map_collection_created_ethereum
-      # - map: map_add_items
-      # - map: map_issues
-      # - map: map_order_created
-      # - map: map_order_executed
-      # - map: map_order_cancelled
-      # - store: store_orders
     output:
       type: proto:sf.substreams.sink.database.v1.DatabaseChanges

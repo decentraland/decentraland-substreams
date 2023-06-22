@@ -240,6 +240,7 @@ pub fn map_add_items_v1(
             .map(|(add_item_event, log)| {
                 let item = add_item_event.wearable_id;
                 let representation = data::collections::find_wearable(&item).unwrap();
+                let collection = Hex(event.address).to_string();
                 // sanitize_sql_string(metadata.clone());
                 dcl::Item {
                     id: utils::get_item_id(
@@ -254,8 +255,21 @@ pub fn map_add_items_v1(
                     price: Some(dcl::BigInt {
                         value: "0".to_string(),
                     }),
+                    collection: collection.clone(),
                     beneficiary: Hex(constants::ZERO_ADDRESS).to_string(),
-                    metadata: metadata.clone(),
+                    metadata: Some(dcl::Metadata {
+                        item_type: dcl::ItemType::WearableV1 as i32, //TODO: check if the cast works in runtime
+                        id: representation.id,
+                        wearable: Some(dcl::Wearable {
+                            id: representation.id,
+                            name: representation.name,
+                            description: representation.description,
+                            collection: collection.clone(),
+                            category: representation.category as dcl::WearableCategory,
+                            rarity: representation.rarity,
+                        }),
+                    }),
+                    // metadata: metadata.clone(),
                     // content_hash: None,
                     blockchain_item_id: Some(add_item_event.item_id.into()),
                     collection_id: Hex(log.address()).to_string(),

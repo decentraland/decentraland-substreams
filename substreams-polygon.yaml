@@ -42,6 +42,15 @@ modules:
     output:
       type: proto:dcl.CollectionSetApprovedEvents
 
+  - name: map_collection_set_global_minter_event
+    kind: map
+    initialBlock: 15202000
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections
+    output:
+      type: proto:dcl.CollectionSetGlobalMinterEvents
+
   - name: map_issues
     kind: map
     initialBlock: 15202000
@@ -128,6 +137,7 @@ modules:
       - map: map_add_items
       - map: map_issues
       - map: map_collection_set_approved_event
+      - map: map_collection_set_global_minter_event
       - map: map_order_created
       - map: map_order_executed
       - map: map_order_cancelled

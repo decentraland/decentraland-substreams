@@ -73,6 +73,17 @@ message CollectionSetApprovedEvents {
     repeated CollectionSetApprovedEvent events = 1;
 }
 
+message CollectionSetGlobalMinterEvent {
+  string collection = 1;
+  string minter = 2;
+  bool value = 3;
+  string timestamp = 4;
+}
+
+message CollectionSetGlobalMinterEvents {
+    repeated CollectionSetGlobalMinterEvent events = 1;
+}
+
 message NFTs {
     repeated NFT nfts = 1;
 }

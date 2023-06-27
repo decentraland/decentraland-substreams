@@ -2,6 +2,7 @@ pub mod items;
 pub mod metadata;
 pub mod nfts;
 pub mod orders;
+pub mod store;
 pub mod urn;
 use std::str::FromStr;
 use substreams::scalar::BigInt;

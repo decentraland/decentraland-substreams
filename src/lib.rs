@@ -342,6 +342,43 @@ pub fn map_collection_set_approved_event(
     Ok(dcl::CollectionSetApprovedEvents { events })
 }
 
+// Reads the SetGlobalMinter Event for collections v2
+#[substreams::handlers::map]
+pub fn map_collection_set_global_minter_event(
+    blk: eth::Block,
+    collections_store: substreams::store::StoreGetString,
+) -> Result<dcl::CollectionSetGlobalMinterEvents, substreams::errors::Error> {
+    let mut events = vec![];
+    for trx in blk.transactions() {
+        for call in trx.calls.iter() {
+            let _call_index = call.index;
+            if call.state_reverted {
+                continue;
+            }
+
+            for log in call.logs.iter() {
+                let collection_address = &Hex(log.clone().address).to_string();
+                if let Some(_collection) = collections_store.get_last(collection_address) {
+                    if let Some(event) =
+                        abi::collections_v2::events::SetGlobalMinter::match_and_decode(log)
+                    {
+                        substreams::log::info!("SetGlobalMinter Event found! {:?}", event);
+                        let timestamp = blk.timestamp_seconds().to_string();
+                        let nft = dcl::CollectionSetGlobalMinterEvent {
+                            collection: collection_address.to_string(),
+                            minter: Hex(event.minter).to_string(),
+                            timestamp,
+                            value: event.value,
+                        };
+                        events.push(nft);
+                    }
+                }
+            }
+        }
+    }
+    Ok(dcl::CollectionSetGlobalMinterEvents { events })
+}
+
 /// NFTS Collections V2
 /// Reads Issue events from the contract
 #[substreams::handlers::map]
@@ -676,6 +713,7 @@ fn db_out_polygon(
     items: dcl::Items,
     nfts: dcl::NfTs,
     set_approved_events: dcl::CollectionSetApprovedEvents,
+    set_store_minter_events: dcl::CollectionSetGlobalMinterEvents,
     orders: dcl::Orders,
     orders_executed: dcl::Orders,
     orders_cancelled: dcl::Orders,
@@ -698,6 +736,9 @@ fn db_out_polygon(
     // SetApprovedEvents
     log::info!("In db out set_events_approved {:?}", set_approved_events);
     db::collections::update_collection_is_approved(&mut tables, set_approved_events);
+    // SetStoreMinterEvenbts
+    log::info!("In db out set_store_minter {:?}", set_store_minter_events);
+    db::collections::update_collection_search_is_store_minter(&mut tables, set_store_minter_events);
     // get the item available count based on nfts minted
     db::items::update_item_available(
         &mut tables,

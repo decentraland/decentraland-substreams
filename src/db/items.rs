@@ -47,7 +47,7 @@ fn get_item_changes(changes: &mut Tables, item: dcl::Item, blockchain_id: Option
                 value: String::from("0"),
             })),
         )
-        .set("beneficiary", item.beneficiary)
+        .set("beneficiary", dcl_hex!(item.beneficiary))
         .set(
             "content_hash",
             item.content_hash.unwrap_or_else(|| String::from("")),

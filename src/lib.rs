@@ -7,8 +7,11 @@ mod pb;
 mod rpc;
 mod utils;
 
+use constants::{
+    COLLECTIONS_FACTORY, COLLECTIONS_V3_FACTORY, MARKETPLACEV2_CONTRACT,
+    MARKETPLACE_GOERLI_CONTRACT, MARKETPLACE_MAINNET_CONTRACT,
+};
 use data::constants::collections_v1;
-use hex_literal::hex;
 use pb::dcl;
 use std::collections::HashMap;
 use substreams::prelude::*;
@@ -19,17 +22,6 @@ use substreams_ethereum::pb::eth::v2 as eth;
 use substreams_ethereum::Event;
 
 use crate::utils::sanitize_sql_string;
-
-// Contracts
-// Ethereum Mainnet
-const MARKETPLACE_MAINNET_CONTRACT: [u8; 20] = hex!("8e5660b4ab70168b5a6feea0e0315cb49c8cd539");
-// Ethereum Goerli
-const MARKETPLACE_GOERLI_CONTRACT: [u8; 20] = hex!("5d01fbD3E22892be40F69bdAE7Ad921C8cdA2085");
-// Polygon Mainnet
-const _MARKETPLACE_CONTRACT: [u8; 20] = hex!("02080031b45A3c67d338Dd4A2CC309D28756A160");
-const MARKETPLACEV2_CONTRACT: [u8; 20] = hex!("480a0f4e360E8964e68858Dd231c2922f1df45Ef");
-const COLLECTIONS_FACTORY: [u8; 20] = hex!("B549B2442b2BD0a53795BC5cDcBFE0cAF7ACA9f8");
-const COLLECTIONS_V3_FACTORY: [u8; 20] = hex!("3195e88aE10704b359764CB38e429D24f1c2f781");
 
 substreams_ethereum::init!();
 
@@ -79,7 +71,6 @@ pub fn map_add_items_v1(
                         value: "0".to_string(),
                     }),
                     beneficiary: constants::ZERO_ADDRESS.to_string(),
-                    // beneficiary: Hex(constants::ZERO_ADDRESS).to_string(),
                     raw_metadata: String::new(),         // not used in v1
                     search_is_collection_approved: true, // not used for v1
                     minters: [].to_vec(),                // not used for v1
@@ -92,7 +83,7 @@ pub fn map_add_items_v1(
                     reviewed_at: blk.timestamp_seconds(),
                     search_is_store_minter: false, // not used for v1
                     metadata: Some(dcl::Metadata {
-                        item_type: utils::items::WEARABLE_V1.to_string(), //TODO: check if the cast works in runtime
+                        item_type: utils::items::WEARABLE_V1.to_string(),
                         id: representation.id.clone(),
                         wearable: Some(dcl::Wearable {
                             id: representation.id,
@@ -100,19 +91,15 @@ pub fn map_add_items_v1(
                             description: representation.description,
                             collection: collection_address,
                             category: representation.category,
-                            // category: representation.category as dcl::WearableCategory,
                             rarity: representation.rarity,
                             body_shapes: representation.body_shapes,
                         }),
                         emote: None,
                     }),
-                    // metadata: metadata.clone(),
-                    // content_hash: None,
-                    // blockchain_id: collection_item_count.unwrap_or_else(BigInt::zero).into(),
-                    item_type: utils::items::WEARABLE_V1.to_string(), //TODO: check if the cast works in runtime
-                    content_hash: None,
-                    first_listed_at: None,
-                    sold_at: None,
+                    item_type: utils::items::WEARABLE_V1.to_string(),
+                    content_hash: None,    // not used for v1
+                    first_listed_at: None, // not used for v1
+                    sold_at: None,         // not used for v1
                 }
             })
             .collect(),
@@ -436,7 +423,6 @@ pub fn map_add_items(
                 let collection_data = rpc::collection_data_call(log.address().to_vec());
                 //@TODO missing fields:
                 // creation_fee => grab from oracle
-                // creator? => it can be part of the collection
                 let collection_address = Hex(log.address()).to_string();
                 let abi::collections_v2_fixed::events::Erc721BaseCollectionV2Item {
                     beneficiary,
@@ -527,14 +513,12 @@ pub fn map_order_created(
                 id: id.clone(),
                 marketplace_address: Hex(log.address()).to_string(),
                 status: String::from(utils::orders::ORDER_OPEN),
-                // TODO: add nft_address
-                // TODO: add item
                 nft_address: Hex(event.nft_address.clone()).to_string(),
                 nft: format!("{}-{}", Hex(event.nft_address).to_string(), event.asset_id),
                 token_id: Some(dcl::BigInt {
                     value: event.asset_id.to_string(),
                 }),
-                item: String::from(""), //@TODO: fix me
+                item: String::from(""), // Item field is then set when inserting in the db
                 price: Some(dcl::BigInt {
                     value: event.price_in_wei.to_string(),
                 }),

@@ -4,10 +4,6 @@ use crate::pb::dcl::{Item, Metadata};
 
 use super::metadata::{build_emote_item, build_wearable_item};
 
-pub const WEARABLE: &str = "wearable";
-pub const EMOTE: &str = "emote";
-pub const SMART_WEARABLE: &str = "smart_wearable";
-
 pub const WEARABLE_V1: &str = "wearable_v1";
 pub const WEARABLE_V2: &str = "wearable_v2";
 pub const SMART_WEARABLE_V1: &str = "smart_wearable_v1";
@@ -25,13 +21,13 @@ pub fn get_item_type_from_metadata(raw_metadata: String) -> ItemMetadata {
     log::info!("splitted {:?}", splitted);
     ItemMetadata {
         item_type: match splitted[1] {
-            WEARABLE_V1 => WEARABLE.to_string(),
-            WEARABLE_V2 => WEARABLE.to_string(),
-            WEARABLE_TYPE_SHORT => WEARABLE.to_string(),
-            SMART_WEARABLE_V1 => SMART_WEARABLE.to_string(),
-            SMART_WEARABLE_TYPE_SHORT => SMART_WEARABLE.to_string(),
-            EMOTE_TYPE_SHORT => EMOTE.to_string(),
-            EMOTE_V1 => EMOTE.to_string(),
+            WEARABLE_TYPE_SHORT => WEARABLE_V2.to_string(),
+            SMART_WEARABLE_TYPE_SHORT => SMART_WEARABLE_V1.to_string(),
+            EMOTE_TYPE_SHORT => EMOTE_V1.to_string(),
+            WEARABLE_V1 => WEARABLE_V1.to_string(),
+            WEARABLE_V2 => WEARABLE_V2.to_string(),
+            SMART_WEARABLE_V1 => SMART_WEARABLE_V1.to_string(),
+            EMOTE_V1 => EMOTE_V1.to_string(),
             &_ => String::from(""), // fallback
         },
     }
@@ -40,7 +36,7 @@ pub fn get_item_type_from_metadata(raw_metadata: String) -> ItemMetadata {
 pub fn build_metadata(item: &Item) -> Metadata {
     let id = item.id.clone();
     let mut metadata = Metadata {
-        id: id.clone(),
+        id,
         item_type: "".to_string(),
         wearable: None,
         emote: None,

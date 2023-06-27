@@ -1,11 +1,7 @@
 pub mod collections_v1 {
     use hex_literal::hex;
-    pub const FIRST_COLLECTION_CREATED_GOERLI: &[&[u8]] =
-        &[&hex!("1f0880e0b4514dc58e68b9be91693bfa8c067ac1")];
     pub const COLLECTIONS_GOERLI_HEX: &[&[u8]] =
         &[&hex!("1f0880e0b4514dc58e68b9be91693bfa8c067ac1")];
-    pub const COLLECTIONS_GOERLI: [&str; 1] = ["0x1f0880e0b4514dc58e68b9be91693bfa8c067ac1"];
-    // pub const COLLECTIONS_GOERLI: &[&[u8]] = &[&hex!("1f0880e0b4514dc58e68b9be91693bfa8c067ac1")];
     pub const COLLECTIONS_MAINNET: &[&[u8]] = &[
         &hex!("30ae57840b0e9b8ea55334083d53d80b2cfe80e0"),
         &hex!("1f0880E0b4514DC58e68B9BE91693bFA8C067ac1"),

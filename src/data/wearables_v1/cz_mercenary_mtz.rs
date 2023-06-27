@@ -1,6 +1,7 @@
 use super::wearable::Wearable;
 
-pub const cz_mercenary_mtz: Vec<Wearable> = vec![
+pub fn cz_mercenary_mtz() -> Vec<Wearable> {
+    vec![
   Wearable::new(
 String::from("holo_display_eyewear"),
 String::from("Holo Display"),
@@ -49,4 +50,5 @@ String::from("upper_body"),
 String::from("legendary"),
     vec![String::from("BaseMale"), String::from("BaseFemale")],
 ),
-];
+]
+}

@@ -17,69 +17,78 @@ binaries:
     file: ./target/wasm32-unknown-unknown/release/substreams.wasm
 
 modules:
-  - name: map_collection_created_ethereum
+  - name: map_add_items_v1
     kind: map
-    initialBlock: { { initialBlock } }
+    initialBlock: 8828687
     inputs:
+      - params: string
       - source: sf.ethereum.type.v2.Block
     output:
-      type: proto:dcl.Collections
+      type: proto:dcl.Items
 
-  - name: map_collection_created
-    kind: map
-    initialBlock: 28229316 # This is the when the first collection was created
-    inputs:
-      - source: sf.ethereum.type.v2.Block
-    output:
-      type: proto:dcl.Collections
-
-  - name: store_collections
+  - name: store_collections_items_available
     kind: store
-    initialBlock: 28229316
     updatePolicy: set
     valueType: string
+    initialBlock: 8828687
     inputs:
-      - map: map_collection_created
+      - map: map_add_items_v1
 
-  - name: map_issues
+  - name: store_collections_v1
+    kind: store
+    updatePolicy: add
+    valueType: int64
+    initialBlock: 8828687
+    inputs:
+      - map: map_add_items_v1
+
+  - name: map_add_collections_v1
     kind: map
-    initialBlock: 28229316
+    initialBlock: 8828687
+    inputs:
+      - map: map_add_items_v1
+      - store: store_collections_v1
+    output:
+      type: proto:dcl.Collections
+
+  - name: map_issues_v1
+    kind: map
+    initialBlock: 8828687
     inputs:
       - source: sf.ethereum.type.v2.Block
-      - store: store_collections
+      - store: store_collections_v1
     output:
       type: proto:dcl.NFTs
 
-  - name: map_add_items
-    kind: map
-    initialBlock: 28229316
+  - name: store_items_mints
+    kind: store
+    updatePolicy: add
+    valueType: int64
+    initialBlock: 8828687
     inputs:
-      - source: sf.ethereum.type.v2.Block
-      - map: map_collection_created # depends on the map and not store because the AddItem happens in the same block as the ProxyCreated event, so the store won't have the address yet
-    output:
-      type: proto:dcl.Items
+      - map: map_issues_v1
 
-  - name: map_collection_complete
-    kind: map
-    initialBlock: 28229316
+  - name: store_nfts_item
+    kind: store
+    initialBlock: 8828687
+    updatePolicy: set
+    valueType: string
     inputs:
-      - source: sf.ethereum.type.v2.Block
-      - map: map_collection_created # depends on the map and not store because the complete happens in the same block as the ProxyCreated event, so the store won't have the address yet
-    output:
-      type: proto:dcl.Items
+      - map: map_issues_v1
 
   # Orders
   - name: map_order_created
     kind: map
-    initialBlock: 28229316
+    initialBlock: 8828687
     inputs:
+      - params: string
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:dcl.Orders
 
   - name: store_orders
     kind: store
-    initialBlock: 28229316
+    initialBlock: 8828687
     updatePolicy: set
     valueType: string
     inputs:
@@ -87,30 +96,42 @@ modules:
 
   - name: map_order_executed
     kind: map
-    initialBlock: 28229316
+    initialBlock: 8828687
     inputs:
+      - params: string
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:dcl.Orders
 
   - name: map_order_cancelled
     kind: map
-    initialBlock: 28229316
+    initialBlock: 8828687
     inputs:
+      - params: string
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:dcl.Orders
 
   - name: db_out
-    initialBlock: { { initialBlock } }
+    initialBlock: 8828687
     kind: map
     inputs:
-      - map: map_collection_created
-      - map: map_add_items
-      - map: map_issues
+      - map: map_add_collections_v1
+      - map: map_add_items_v1
+      - map: map_issues_v1
       - map: map_order_created
       - map: map_order_executed
       - map: map_order_cancelled
       - store: store_orders
+      - store: store_nfts_item
+      - store: store_collections_items_available
+      - store: store_items_mints
+      - store: store_collections_v1
     output:
       type: proto:sf.substreams.sink.database.v1.DatabaseChanges
+
+params:
+  map_add_items_v1: "mainnet"
+  map_order_created: "mainnet"
+  map_order_executed: "mainnet"
+  map_order_cancelled: "mainnet"

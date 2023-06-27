@@ -1,6 +1,7 @@
 use super::wearable::Wearable;
 
-pub const china_flying: Vec<Wearable> = vec![
+pub fn china_flying() -> Vec<Wearable> {
+    vec![
     Wearable::new(
         String::from("china_flying_hair_female"),
         String::from("China flying hair"),
@@ -49,4 +50,5 @@ pub const china_flying: Vec<Wearable> = vec![
         String::from("legendary"),
         vec![String::from("BaseMale")],
     ),
-];
+]
+}

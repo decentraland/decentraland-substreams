@@ -15,7 +15,7 @@ message Item {
   string collection = 2;
   int64 blockchain_id = 3;
   string creator = 4;
-  ItemType item_type = 5;
+  string item_type = 5;
   BigInt total_supply = 6;
   BigInt max_supply = 7;
   string rarity = 8;
@@ -23,7 +23,7 @@ message Item {
   BigInt available = 10;
   BigInt price = 11;
   string beneficiary = 12;
-  string content_hash = 13;
+  optional string content_hash = 13;
   string uri = 14;
   string image = 15;
   repeated string minters = 16;
@@ -34,9 +34,10 @@ message Item {
   uint64 created_at = 21;
   uint64 updated_at = 22;
   uint64 reviewed_at = 23;
-  uint64 sold_at = 24;
-  uint64 first_listed_at = 25;
+  optional uint64 sold_at = 24;
+  optional uint64 first_listed_at = 25;
   bool search_is_store_minter = 26;
+  bool search_is_collection_approved = 27;
 }
 
 message Collections {
@@ -56,9 +57,20 @@ message Collection {
     repeated string managers = 10;
     string urn = 11;
     uint64 created_at = 12;
-    uint64 reviewed_at = 13;
-    optional uint64 first_listed_at = 14;
-    bool search_is_store_minter = 15;
+    uint64 updated_at = 13;
+    uint64 reviewed_at = 14;
+    optional uint64 first_listed_at = 15;
+    bool search_is_store_minter = 16;
+}
+
+message CollectionSetApprovedEvent {
+    string collection = 1;
+    bool new_value = 2;
+    string updated_at = 3;
+}
+
+message CollectionSetApprovedEvents {
+    repeated CollectionSetApprovedEvent events = 1;
 }
 
 message NFTs {
@@ -66,13 +78,14 @@ message NFTs {
 }
   
 message NFT {
-    string beneficiary = 1;
-    BigInt tokenId = 2;
-    string itemId = 3;
-    BigInt issuedId = 4;
-    string collection_address = 5;
-    string created_at = 6;
-    string updated_at = 7;
+    string owner = 1;
+    string beneficiary = 2;
+    BigInt tokenId = 3;
+    string itemId = 4;
+    BigInt issuedId = 5;
+    string collection_address = 6;
+    string created_at = 7;
+    string updated_at = 8;
 }
   
 
@@ -83,7 +96,7 @@ message Orders {
 message Order {
     string id = 1;
     string marketplace_address = 2;
-    string nft_id = 3;
+    string nft = 3;
     BigInt token_id = 4;
     string tx_hash = 5;
     string owner = 6;
@@ -91,14 +104,17 @@ message Order {
     BigInt price = 8;
     string status = 9;
     uint64 block_number = 10;
-    BigInt expires_at = 11;
-    uint64 updated_at = 12;
+    uint64 created_at = 11;
+    BigInt expires_at = 12;
+    uint64 updated_at = 13;
+    string item = 14;
+    string nft_address = 15;
 }
 
 
 message Metadata {
   string id = 1;
-  ItemType item_type = 2;
+  string item_type = 2;
   Wearable wearable = 3;
   Emote emote = 4;
 }
@@ -116,9 +132,9 @@ message Wearable {
   string name = 2;
   string description = 3;
   string collection = 4;
-  WearableCategory category = 5;
-  WearableRarity rarity = 6;
-  repeated WearableBodyShape body_shapes = 7;
+  string category = 5;
+  string rarity = 6;
+  repeated string body_shapes = 7;
 }
 
 message Emote {
@@ -126,10 +142,10 @@ message Emote {
   string name = 2;
   string description = 3;
   string collection = 4;
-  EmoteCategory category = 5;
+  string category = 5;
   bool loop = 6;
-  WearableRarity rarity = 7;
-  repeated WearableBodyShape body_shapes = 8;
+  string rarity = 7;
+  repeated string body_shapes = 8;
 }
 
 enum WearableCategory {

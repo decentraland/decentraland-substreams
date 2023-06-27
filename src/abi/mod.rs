@@ -23,4 +23,4 @@ pub mod collection_factory;
 
 #[path = "ERC721.rs"]
 #[allow(dead_code)]
-pub mod ERC721;
+pub mod erc721;

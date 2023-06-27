@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Wearable {
     pub id: String,
     pub name: String,

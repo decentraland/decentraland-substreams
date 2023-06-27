@@ -1,59 +1,41 @@
 use crate::dcl_hex;
 use crate::pb::dcl;
 use crate::utils::sanitize_sql_string;
-use substreams_database_change::pb::database::{table_change, DatabaseChanges};
+use substreams_database_change::tables::Tables;
 
-pub fn transform_collection_database_changes(
-    changes: &mut DatabaseChanges,
-    collections: dcl::Collections,
-) {
+pub fn transform_collection_database_changes(changes: &mut Tables, collections: dcl::Collections) {
     for collection in collections.collections {
         changes
-            .push_change(
-                String::from("collections"),
-                dcl_hex!(collection.address.clone()),
-                0,
-                table_change::Operation::Create,
-            )
-            .change("owner", (None, dcl_hex!(collection.owner)))
-            .change("creator", (None, dcl_hex!(collection.creator)))
-            .change("name", (None, sanitize_sql_string(collection.name)))
-            .change("symbol", (None, sanitize_sql_string(collection.symbol)))
-            .change("is_completed", (None, collection.is_completed))
-            .change("is_approved", (None, collection.is_approved))
-            .change("is_editable", (None, collection.is_editable))
-            .change("urn", (None, collection.urn))
-            // .change(
-            //     "managers",
-            //     (
-            //         None,
-            //         collection
-            //             .managers
-            //             .into_iter()
-            //             .flat_map(|s| s.into_bytes())
-            //             .collect::<Vec<u8>>(),
-            //     ),
-            // )
-            // .change(
-            //     "minters",
-            //     (
-            //         None,
-            //         collection
-            //             .minters
-            //             .into_iter()
-            //             .flat_map(|s| s.into_bytes())
-            //             .collect::<Vec<u8>>(),
-            //     ),
-            // )
-            .change("created_at", (None, collection.created_at))
-            .change("reviewed_at", (None, collection.reviewed_at))
-            .change(
+            .create_row("collections", dcl_hex!(collection.address.clone()))
+            .set("owner", dcl_hex!(collection.owner))
+            .set("creator", dcl_hex!(collection.creator))
+            .set("name", sanitize_sql_string(collection.name))
+            .set("symbol", sanitize_sql_string(collection.symbol))
+            .set("is_completed", collection.is_completed)
+            .set("is_approved", collection.is_approved)
+            .set("is_editable", collection.is_editable)
+            .set("urn", collection.urn)
+            // .set("managers", managers2) @TODO: fix this and add minters as well
+            .set("created_at", collection.created_at)
+            .set("updated_at", collection.updated_at)
+            .set("reviewed_at", collection.reviewed_at)
+            .set(
                 "first_listed_at",
-                (None, collection.first_listed_at.unwrap_or_default()),
+                collection.first_listed_at.unwrap_or_default(),
             )
-            .change(
-                "search_is_store_minter",
-                (None, collection.search_is_store_minter),
-            );
+            .set("search_is_store_minter", collection.search_is_store_minter);
+    }
+}
+
+pub fn update_collection_is_approved(
+    changes: &mut Tables,
+    set_approved_events: dcl::CollectionSetApprovedEvents,
+) {
+    for event in set_approved_events.events {
+        changes
+            .update_row("collections", dcl_hex!(event.collection.clone()))
+            .set("is_approved", dcl_hex!(event.new_value))
+            .set("updated_at", dcl_hex!(event.updated_at))
+            .set("reviewed_at", dcl_hex!(event.updated_at));
     }
 }

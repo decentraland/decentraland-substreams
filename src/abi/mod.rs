@@ -16,3 +16,11 @@ pub mod marketplace;
 #[path = "marketplacev2.rs"]
 #[allow(dead_code)]
 pub mod marketplacev2;
+
+#[path = "collectionFactory.rs"]
+#[allow(dead_code)]
+pub mod collection_factory;
+
+#[path = "ERC721.rs"]
+#[allow(dead_code)]
+pub mod erc721;

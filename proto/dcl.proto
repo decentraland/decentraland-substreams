@@ -11,18 +11,33 @@ message Items {
 }
 
 message Item {
-    string id = 1;
-    string rarity = 2;
-    BigInt max_supply = 3;
-    BigInt total_supply = 4;
-    BigInt price = 5;
-    string beneficiary = 6;
-    string metadata = 7;
-    string content_hash = 8;
-    BigInt blockchain_item_id = 9;
-    string collection_id = 10;
-    uint64 created_at = 11;
-    string item_type = 12;
+  string id = 1;
+  string collection = 2;
+  int64 blockchain_id = 3;
+  string creator = 4;
+  string item_type = 5;
+  BigInt total_supply = 6;
+  BigInt max_supply = 7;
+  string rarity = 8;
+  BigInt creation_fee = 9;
+  BigInt available = 10;
+  BigInt price = 11;
+  string beneficiary = 12;
+  optional string content_hash = 13;
+  string uri = 14;
+  string image = 15;
+  repeated string minters = 16;
+  repeated string managers = 17;
+  Metadata metadata = 18;
+  string raw_metadata = 19;
+  string urn = 20;
+  uint64 created_at = 21;
+  uint64 updated_at = 22;
+  uint64 reviewed_at = 23;
+  optional uint64 sold_at = 24;
+  optional uint64 first_listed_at = 25;
+  bool search_is_store_minter = 26;
+  bool search_is_collection_approved = 27;
 }
 
 message Collections {
@@ -37,7 +52,25 @@ message Collection {
     string owner = 5;
     bool is_completed = 6;
     bool is_approved = 7;
-    uint64 created_at = 8;
+    bool is_editable = 8;
+    repeated string minters = 9;
+    repeated string managers = 10;
+    string urn = 11;
+    uint64 created_at = 12;
+    uint64 updated_at = 13;
+    uint64 reviewed_at = 14;
+    optional uint64 first_listed_at = 15;
+    bool search_is_store_minter = 16;
+}
+
+message CollectionSetApprovedEvent {
+    string collection = 1;
+    bool new_value = 2;
+    string updated_at = 3;
+}
+
+message CollectionSetApprovedEvents {
+    repeated CollectionSetApprovedEvent events = 1;
 }
 
 message NFTs {
@@ -45,13 +78,14 @@ message NFTs {
 }
   
 message NFT {
-    string beneficiary = 1;
-    BigInt tokenId = 2;
-    string itemId = 3;
-    BigInt issuedId = 4;
-    string collection_address = 5;
-    string created_at = 6;
-    string updated_at = 7;
+    string owner = 1;
+    string beneficiary = 2;
+    BigInt tokenId = 3;
+    string itemId = 4;
+    BigInt issuedId = 5;
+    string collection_address = 6;
+    string created_at = 7;
+    string updated_at = 8;
 }
   
 
@@ -62,7 +96,7 @@ message Orders {
 message Order {
     string id = 1;
     string marketplace_address = 2;
-    string nft_id = 3;
+    string nft = 3;
     BigInt token_id = 4;
     string tx_hash = 5;
     string owner = 6;
@@ -70,7 +104,91 @@ message Order {
     BigInt price = 8;
     string status = 9;
     uint64 block_number = 10;
-    BigInt expires_at = 11;
-    uint64 updated_at = 12;
+    uint64 created_at = 11;
+    BigInt expires_at = 12;
+    uint64 updated_at = 13;
+    string item = 14;
+    string nft_address = 15;
 }
 
+
+message Metadata {
+  string id = 1;
+  string item_type = 2;
+  Wearable wearable = 3;
+  Emote emote = 4;
+}
+
+enum ItemType {
+  UNDEFINED = 0;
+  WEARABLE_V1 = 1;
+  WEARABLE_V2 = 2;
+  SMART_WEARABLE_V1 = 3;
+  EMOTE_V1 = 4;
+}
+
+message Wearable {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string collection = 4;
+  string category = 5;
+  string rarity = 6;
+  repeated string body_shapes = 7;
+}
+
+message Emote {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string collection = 4;
+  string category = 5;
+  bool loop = 6;
+  string rarity = 7;
+  repeated string body_shapes = 8;
+}
+
+enum WearableCategory {
+  EYEBROWS = 0;
+  EYES = 1;
+  FACIAL_HAIR = 2;
+  HAIR = 3;
+  MOUTH = 4;
+  UPPER_BODY = 5;
+  LOWER_BODY = 6;
+  FEET = 7;
+  EARRING = 8;
+  EYEWEAR = 9;
+  HAT = 10;
+  HELMET = 11;
+  MASK = 12;
+  TIARA = 13;
+  TOP_HEAD = 14;
+  SKIN = 15;
+}
+
+enum EmoteCategory {
+  DANCE = 0;
+  STUNT = 1;
+  GREETINGS = 2;
+  FUN = 3;
+  POSES = 4;
+  REACTIONS = 5;
+  HORROR = 6;
+  MISCELLANEOUS = 7;
+}
+
+enum WearableRarity {
+  COMMON = 0;
+  UNCOMMON = 1;
+  RARE = 2;
+  EPIC = 3;
+  LEGENDARY = 4;
+  MYTHIC = 5;
+  UNIQUE = 6;
+}
+
+enum WearableBodyShape {
+  BASE_FEMALE = 0;
+  BASE_MALE = 1;
+}

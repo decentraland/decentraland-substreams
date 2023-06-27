@@ -22,5 +22,15 @@ fn main() -> Result<(), anyhow::Error> {
         .generate()?
         .write_to_file("src/abi/collectionFactoryv3.rs")?;
 
+    // CollectionFactory contract
+    Abigen::new("CollectionFactory", "abi/CollectionFactory.json")?
+        .generate()?
+        .write_to_file("src/abi/collectionFactory.rs")?;
+
+    // ERC721 collection v1 contract
+    Abigen::new("ERC721", "abi/ERC721.json")?
+        .generate()?
+        .write_to_file("src/abi/ERC721.rs")?;
+
     Ok(())
 }

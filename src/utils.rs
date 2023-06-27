@@ -1,6 +1,8 @@
-pub mod nfts;
 pub mod items;
+pub mod metadata;
+pub mod nfts;
 pub mod orders;
+pub mod urn;
 use std::str::FromStr;
 use substreams::scalar::BigInt;
 
@@ -33,4 +35,9 @@ pub fn sanitize_sql_string(mut str: String) -> String {
         quotes_scaped = quotes_scaped + 1;
     }
     str
+}
+
+pub fn format_postgres_array(strings: Vec<String>) -> String {
+    let formatted_elements: Vec<String> = strings.into_iter().collect();
+    format!("'{{{}}}'", formatted_elements.join(", "))
 }

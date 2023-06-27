@@ -33,6 +33,15 @@ modules:
     inputs:
       - map: map_collection_created
 
+  - name: map_collection_set_approved_event
+    kind: map
+    initialBlock: 15202000
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections
+    output:
+      type: proto:dcl.CollectionSetApprovedEvents
+
   - name: map_issues
     kind: map
     initialBlock: 15202000
@@ -41,6 +50,22 @@ modules:
       - store: store_collections
     output:
       type: proto:dcl.NFTs
+
+  - name: store_items_mints
+    kind: store
+    updatePolicy: add
+    valueType: int64
+    initialBlock: 15202000
+    inputs:
+      - map: map_issues
+
+  - name: store_nfts_item
+    kind: store
+    initialBlock: 15202000
+    updatePolicy: set
+    valueType: string
+    inputs:
+      - map: map_issues
 
   - name: map_add_items
     kind: map
@@ -51,20 +76,20 @@ modules:
     output:
       type: proto:dcl.Items
 
-  - name: map_collection_complete
-    kind: map
+  - name: store_collections_items_available
+    kind: store
+    updatePolicy: set
+    valueType: string
     initialBlock: 15202000
     inputs:
-      - source: sf.ethereum.type.v2.Block
-      - map: map_collection_created # depends on the map and not store because the complete happens in the same block as the ProxyCreated event, so the store won't have the address yet
-    output:
-      type: proto:dcl.Items
+      - map: map_add_items
 
   # Orders
   - name: map_order_created
     kind: map
     initialBlock: 15202000
     inputs:
+      - params: string
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:dcl.Orders
@@ -81,6 +106,7 @@ modules:
     kind: map
     initialBlock: 15202000
     inputs:
+      - params: string
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:dcl.Orders
@@ -89,20 +115,30 @@ modules:
     kind: map
     initialBlock: 15202000
     inputs:
+      - params: string
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:dcl.Orders
 
-  - name: db_out
+  - name: db_out_polygon
     initialBlock: 15202000
     kind: map
     inputs:
       - map: map_collection_created
       - map: map_add_items
       - map: map_issues
+      - map: map_collection_set_approved_event
       - map: map_order_created
       - map: map_order_executed
       - map: map_order_cancelled
       - store: store_orders
+      - store: store_nfts_item
+      - store: store_collections_items_available
+      - store: store_items_mints
     output:
       type: proto:sf.substreams.sink.database.v1.DatabaseChanges
+
+params:
+  map_order_created: "polygon"
+  map_order_executed: "polygon"
+  map_order_cancelled: "polygon"

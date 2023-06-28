@@ -379,6 +379,43 @@ pub fn map_collection_set_global_minter_event(
     Ok(dcl::CollectionSetGlobalMinterEvents { events })
 }
 
+// Reads the SetGlobalMinter Event for collections v2
+#[substreams::handlers::map]
+pub fn map_collection_set_item_minter_event(
+    blk: eth::Block,
+    collections_store: substreams::store::StoreGetString,
+) -> Result<dcl::SetItemMinterEvents, substreams::errors::Error> {
+    let mut events = vec![];
+    for trx in blk.transactions() {
+        for call in trx.calls.iter() {
+            let _call_index = call.index;
+            if call.state_reverted {
+                continue;
+            }
+
+            for log in call.logs.iter() {
+                let collection_address = &Hex(log.clone().address).to_string();
+                if let Some(_collection) = collections_store.get_last(collection_address) {
+                    if let Some(event) =
+                        abi::collections_v2::events::SetItemMinter::match_and_decode(log)
+                    {
+                        substreams::log::info!("SetItemMinter Event found! {:?}", event);
+                        let timestamp = blk.timestamp_seconds().to_string();
+                        let nft = dcl::SetItemMinterEvent {
+                            collection: collection_address.to_string(),
+                            minter: Hex(event.minter).to_string(),
+                            timestamp,
+                            value: event.value.to_string(),
+                        };
+                        events.push(nft);
+                    }
+                }
+            }
+        }
+    }
+    Ok(dcl::SetItemMinterEvents { events })
+}
+
 /// NFTS Collections V2
 /// Reads Issue events from the contract
 #[substreams::handlers::map]

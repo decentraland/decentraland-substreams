@@ -84,6 +84,17 @@ message CollectionSetGlobalMinterEvents {
     repeated CollectionSetGlobalMinterEvent events = 1;
 }
 
+message SetItemMinterEvent {
+  string collection = 1;
+  string minter = 2;
+  string value = 3;
+  string timestamp = 4;
+}
+
+message SetItemMinterEvents {
+    repeated SetItemMinterEvent events = 1;
+}
+
 message NFTs {
     repeated NFT nfts = 1;
 }

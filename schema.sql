@@ -97,3 +97,9 @@ CREATE TABLE nfts (
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+CREATE TABLE item_minters (
+    item_id TEXT NOT NULL PRIMARY KEY,
+    miniter TEXT NOT NULL,
+    value BOOLEAN NOT NULL,
+    -- updated_at TEXT NOT NULL
+);

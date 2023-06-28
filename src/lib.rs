@@ -379,7 +379,7 @@ pub fn map_collection_set_global_minter_event(
     Ok(dcl::CollectionSetGlobalMinterEvents { events })
 }
 
-// Reads the SetGlobalMinter Event for collections v2
+// Reads the SetItemMinter Event for collections v2
 #[substreams::handlers::map]
 pub fn map_collection_set_item_minter_event(
     blk: eth::Block,
@@ -402,6 +402,7 @@ pub fn map_collection_set_item_minter_event(
                         substreams::log::info!("SetItemMinter Event found! {:?}", event);
                         let timestamp = blk.timestamp_seconds().to_string();
                         let nft = dcl::SetItemMinterEvent {
+                            item: event.item_id.to_string(),
                             collection: collection_address.to_string(),
                             minter: Hex(event.minter).to_string(),
                             timestamp,
@@ -415,6 +416,27 @@ pub fn map_collection_set_item_minter_event(
     }
     Ok(dcl::SetItemMinterEvents { events })
 }
+
+// /// Store addresses of the collections created by map_collection_created
+// #[substreams::handlers::store]
+// pub fn store_items_minters(
+//     set_minter_events: dcl::SetItemMinterEvents,
+//     store: StoreSetProto<dcl::ItemMinters>,
+// ) {
+//     for set_minter_event in set_minter_events.events {
+//         store.set(
+//             0,
+//             set_minter_event.item,
+//             dcl::ItemMinters {
+//                 item: set_minter_event.item,
+//                 minters: vec![dcl::Minter {
+//                     address: set_minter_event.minter,
+//                     value: set_minter_event.value,
+//                 }],
+//             },
+//         ); // we don't really care about the value, we'll just check if the key is present in the store
+//     }
+// }
 
 /// NFTS Collections V2
 /// Reads Issue events from the contract
@@ -751,6 +773,7 @@ fn db_out_polygon(
     nfts: dcl::NfTs,
     set_approved_events: dcl::CollectionSetApprovedEvents,
     set_store_minter_events: dcl::CollectionSetGlobalMinterEvents,
+    set_item_minter_event: dcl::SetItemMinterEvents,
     orders: dcl::Orders,
     orders_executed: dcl::Orders,
     orders_cancelled: dcl::Orders,
@@ -776,6 +799,11 @@ fn db_out_polygon(
     // SetStoreMinterEvenbts
     log::info!("In db out set_store_minter {:?}", set_store_minter_events);
     db::collections::update_collection_search_is_store_minter(&mut tables, set_store_minter_events);
+    log::info!(
+        "In db out set_item_minter_event {:?}",
+        set_item_minter_event
+    );
+    db::items::update_item_minter(&mut tables, set_item_minter_event);
     // get the item available count based on nfts minted
     db::items::update_item_available(
         &mut tables,

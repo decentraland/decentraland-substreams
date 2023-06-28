@@ -168,3 +168,13 @@ pub fn update_item_available(
             .set("available", subtracted.to_string());
     }
 }
+
+pub fn update_item_minter(changes: &mut Tables, events: dcl::SetItemMinterEvents) {
+    for event in events.events {
+        let item = format!("0x{}-{}", event.collection, event.item);
+        changes
+            .update_row("item_minters", item)
+            .set("minter", event.minter)
+            .set("value", event.value);
+    }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "decentraland-substreams-script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.3.2",
+    "@types/pg": "^8.10.2",
+    "commander": "^11.0.0",
+    "sql-template-strings": "^2.2.2",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "pg": "^8.11.1"
+  }
+}

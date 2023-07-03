@@ -1,6 +1,7 @@
 use crate::dcl_hex;
 use crate::pb::dcl;
 use crate::utils::sanitize_sql_string;
+use crate::utils::store::get_store_address;
 use substreams_database_change::tables::Tables;
 
 pub fn transform_collection_database_changes(changes: &mut Tables, collections: dcl::Collections) {
@@ -34,8 +35,20 @@ pub fn update_collection_is_approved(
     for event in set_approved_events.events {
         changes
             .update_row("collections", dcl_hex!(event.collection.clone()))
-            .set("is_approved", dcl_hex!(event.new_value))
-            .set("updated_at", dcl_hex!(event.updated_at))
-            .set("reviewed_at", dcl_hex!(event.updated_at));
+            .set("is_approved", event.new_value)
+            .set("updated_at", event.updated_at.clone())
+            .set("reviewed_at", event.updated_at);
+    }
+}
+
+pub fn update_collection_search_is_store_minter(
+    changes: &mut Tables,
+    events: dcl::CollectionSetGlobalMinterEvents,
+) {
+    for event in events.events {
+        let is_store_minter = event.value && event.minter == get_store_address("matic");
+        changes
+            .update_row("collections", dcl_hex!(event.collection.clone()))
+            .set("search_is_store_minter", is_store_minter);
     }
 }

@@ -1,3 +1,23 @@
+-- Declare a variable to store the entity_schema value
+DO $$
+DECLARE
+  schema_name TEXT;
+BEGIN
+  -- Retrieve the entity_schema value using the SELECT query
+  	SELECT information.schema_name
+	INTO schema_name
+	FROM information_schema.schemata as information
+	WHERE information.schema_name LIKE 'dcl' || '%'
+	ORDER BY CAST(SUBSTRING(information.schema_name FROM 'dcl([0-9]+)') AS INTEGER) 
+	desc LIMIT 1;
+
+  -- Set the current working schema using the retrieved entity_schema value
+  EXECUTE 'SET search_path TO ' || schema_name;
+
+  -- Output the current working schema
+  RAISE NOTICE 'Current working schema set to: %', schema_name;
+END $$;
+
 CREATE TABLE collections (
     id TEXT NOT NULL PRIMARY KEY,
     owner TEXT NOT NULL,
@@ -26,7 +46,7 @@ create TABLE items (
     max_supply TEXT NOT NULL,
     rarity TEXT NOT NULL,
     creation_fee numeric NOT NULL,
-    available numeric NOT NULL,
+    available TEXT NOT NULL,
     price TEXT NOT NULL,
     beneficiary TEXT NOT NULL,
     content_hash text,
@@ -95,5 +115,11 @@ CREATE TABLE nfts (
     item TEXT NOT NULL,
     owner TEXT NOT NULL,
     created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+CREATE TABLE item_minters (
+    item_id TEXT NOT NULL,
+    minter TEXT NOT NULL,
+    value BOOLEAN NOT NULL,
     updated_at TEXT NOT NULL
 );

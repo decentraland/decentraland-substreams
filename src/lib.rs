@@ -417,27 +417,6 @@ pub fn map_collection_set_item_minter_event(
     Ok(dcl::SetItemMinterEvents { events })
 }
 
-// /// Store addresses of the collections created by map_collection_created
-// #[substreams::handlers::store]
-// pub fn store_items_minters(
-//     set_minter_events: dcl::SetItemMinterEvents,
-//     store: StoreSetProto<dcl::ItemMinters>,
-// ) {
-//     for set_minter_event in set_minter_events.events {
-//         store.set(
-//             0,
-//             set_minter_event.item,
-//             dcl::ItemMinters {
-//                 item: set_minter_event.item,
-//                 minters: vec![dcl::Minter {
-//                     address: set_minter_event.minter,
-//                     value: set_minter_event.value,
-//                 }],
-//             },
-//         ); // we don't really care about the value, we'll just check if the key is present in the store
-//     }
-// }
-
 /// NFTS Collections V2
 /// Reads Issue events from the contract
 #[substreams::handlers::map]

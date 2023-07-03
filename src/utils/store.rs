@@ -1,6 +1,3 @@
-// let is_mint =
-//                             dcl_hex!(Hex(&event.from).to_string()) == *constants::ZERO_ADDRESS;
-
 pub fn get_store_address(network: &str) -> String {
     if network == "matic" {
         return String::from("0x214ffc0f0103735728dc66b61a22e4f163e275ae");
@@ -14,5 +11,5 @@ pub fn get_store_address(network: &str) -> String {
         "Could not find store address. Invalid network {}",
         network
     ));
-    return String::new();
+    String::new()
 }

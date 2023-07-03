@@ -395,22 +395,22 @@ pub fn map_collection_set_item_minter_event(
 
             for log in call.logs.iter() {
                 let collection_address = &Hex(log.clone().address).to_string();
-                if let Some(_collection) = collections_store.get_last(collection_address) {
-                    if let Some(event) =
-                        abi::collections_v2::events::SetItemMinter::match_and_decode(log)
-                    {
-                        substreams::log::info!("SetItemMinter Event found! {:?}", event);
-                        let timestamp = blk.timestamp_seconds().to_string();
-                        let nft = dcl::SetItemMinterEvent {
-                            item: event.item_id.to_string(),
-                            collection: collection_address.to_string(),
-                            minter: Hex(event.minter).to_string(),
-                            timestamp,
-                            value: event.value.to_string(),
-                        };
-                        events.push(nft);
-                    }
+                // if let Some(_collection) = collections_store.get_last(collection_address) {
+                if let Some(event) =
+                    abi::collections_v2::events::SetItemMinter::match_and_decode(log)
+                {
+                    substreams::log::info!("SetItemMinter Event found! {:?}", event);
+                    let timestamp = blk.timestamp_seconds().to_string();
+                    let nft = dcl::SetItemMinterEvent {
+                        item: event.item_id.to_string(),
+                        collection: collection_address.to_string(),
+                        minter: Hex(event.minter).to_string(),
+                        timestamp,
+                        value: event.value.to_string(),
+                    };
+                    events.push(nft);
                 }
+                // }
             }
         }
     }

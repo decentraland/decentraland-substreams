@@ -35,9 +35,9 @@ pub fn update_collection_is_approved(
     for event in set_approved_events.events {
         changes
             .update_row("collections", dcl_hex!(event.collection.clone()))
-            .set("is_approved", dcl_hex!(event.new_value))
-            .set("updated_at", dcl_hex!(event.updated_at))
-            .set("reviewed_at", dcl_hex!(event.updated_at));
+            .set("is_approved", event.new_value)
+            .set("updated_at", event.updated_at.clone())
+            .set("reviewed_at", event.updated_at);
     }
 }
 

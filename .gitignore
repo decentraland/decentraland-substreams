@@ -5,3 +5,5 @@ buf.gen.yaml
 /target
 *.spkg
 substreams
+/scripts/node_modules
+/scripts/dist/*

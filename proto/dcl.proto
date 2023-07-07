@@ -36,8 +36,6 @@ message Item {
   uint64 reviewed_at = 23;
   optional uint64 sold_at = 24;
   optional uint64 first_listed_at = 25;
-  // bool search_is_store_minter = 26;
-  // bool search_is_collection_approved = 27;
   uint64 block_number = 26; 
 }
 
@@ -52,7 +50,6 @@ message Collection {
     string creator = 4;
     string owner = 5;
     bool is_completed = 6;
-    // bool is_approved = 7;
     bool is_editable = 7;
     repeated string minters = 8;
     repeated string managers = 9;
@@ -62,7 +59,6 @@ message Collection {
     uint64 reviewed_at = 13;
     optional uint64 first_listed_at = 14;
     uint64 block_number = 15;
-    // bool search_is_store_minter = 16;
 }
 
 message CollectionSetApprovedEvent {

@@ -1,23 +1,23 @@
 -- Declare a variable to store the entity_schema value
 DO $$
-DECLARE
-  schema_name TEXT;
-BEGIN
-  -- Retrieve the entity_schema value using the SELECT query
-  	SELECT information.schema_name
-	INTO schema_name
-	FROM information_schema.schemata as information
-	WHERE information.schema_name LIKE 'dcl' || '%'
-	ORDER BY CAST(SUBSTRING(information.schema_name FROM 'dcl([0-9]+)') AS INTEGER) 
-	desc LIMIT 1;
-
-  -- Set the current working schema using the retrieved entity_schema value
-  EXECUTE 'SET search_path TO ' || schema_name;
-
-  -- Output the current working schema
-  RAISE NOTICE 'Current working schema set to: %', schema_name;
+DECLARE schema_name TEXT;
+BEGIN -- Retrieve the entity_schema value using the SELECT query
+SELECT information.schema_name INTO schema_name
+FROM information_schema.schemata as information
+WHERE information.schema_name LIKE 'dcl' || '%'
+ORDER BY CAST(
+        SUBSTRING(
+            information.schema_name
+            FROM 'dcl([0-9]+)'
+        ) AS INTEGER
+    ) desc
+LIMIT 1;
+-- Set the current working schema using the retrieved entity_schema value
+EXECUTE 'SET search_path TO ' || schema_name;
+-- Output the current working schema
+RAISE NOTICE 'Current working schema set to: %',
+schema_name;
 END $$;
-
 CREATE TABLE collections (
     id TEXT NOT NULL PRIMARY KEY,
     owner TEXT NOT NULL,
@@ -25,7 +25,6 @@ CREATE TABLE collections (
     name TEXT NOT NULL,
     symbol TEXT NOT NULL,
     is_completed BOOLEAN NOT NULL DEFAULT false,
-    is_approved BOOLEAN NOT NULL DEFAULT false,
     is_editable BOOLEAN NOT NULL DEFAULT false,
     minters text [],
     managers text [],
@@ -34,7 +33,7 @@ CREATE TABLE collections (
     updated_at numeric NOT NULL,
     reviewed_at numeric NOT NULL,
     first_listed_at numeric,
-    search_is_store_minter boolean NOT NULL
+    block_number TEXT NOT NULL
 );
 create TABLE items (
     id TEXT NOT NULL PRIMARY KEY,
@@ -52,8 +51,8 @@ create TABLE items (
     content_hash text,
     uri text NOT NULL,
     image text,
-    minters text[], -- update to NOT NULL later on
-    managers text[], -- update to NOT NULL later on
+    minters text [],
+    managers text [],
     metadata text,
     raw_metadata TEXT NOT NULL,
     urn text NOT NULL,
@@ -62,8 +61,7 @@ create TABLE items (
     reviewed_at numeric NOT NULL,
     sold_at numeric,
     first_listed_at numeric,
-    search_is_store_minter boolean NOT NULL,
-    search_is_collection_approved boolean
+    block_number TEXT NOT NULL
 );
 CREATE TABLE metadata (
     id text NOT NULL,
@@ -94,18 +92,17 @@ CREATE TABLE orders (
     id TEXT NOT NULL PRIMARY KEY,
     marketplace_address TEXT NOT NULL,
     nft TEXT NOT NULL,
-    item text, -- 
-    nft_address text NOT NULL, --
+    item text,
+    nft_address text NOT NULL,
     token_id numeric NOT NULL,
     tx_hash TEXT NOT NULL,
     owner TEXT NOT NULL,
     buyer TEXT,
     price TEXT NOT NULL,
     status TEXT NOT NULL,
-    block_number TEXT NOT NULL,
     expires_at numeric NOT NULL,
     created_at numeric NOT NULL,
-    updated_at numeric NOT NULL
+    updated_at numeric NOT NULL block_number TEXT NOT NULL
 );
 CREATE TABLE nfts (
     id TEXT NOT NULL PRIMARY KEY,
@@ -115,11 +112,30 @@ CREATE TABLE nfts (
     item TEXT NOT NULL,
     owner TEXT NOT NULL,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    block_number TEXT NOT NULL
 );
 CREATE TABLE item_minters (
+    id TEXT NOT NULL PRIMARY KEY,
     item_id TEXT NOT NULL,
     minter TEXT NOT NULL,
     value BOOLEAN NOT NULL,
-    updated_at TEXT NOT NULL
+    timestamp TEXT NOT NULL,
+    block_number TEXT NOT NULL
+);
+CREATE TABLE collection_set_approved_events (
+    id TEXT NOT NULL PRIMARY KEY,
+    collection_id TEXT NOT NULL,
+    value BOOLEAN NOT NULL,
+    timestamp TEXT NOT NULL,
+    block_number TEXT NOT NULL
+);
+CREATE TABLE collection_set_global_minter_events (
+    id TEXT NOT NULL PRIMARY KEY,
+    collection_id TEXT NOT NULL,
+    minter TEXT NOT NULL,
+    value BOOLEAN NOT NULL,
+    search_is_store_minter BOOLEAN NOT NULL,
+    timestamp TEXT NOT NULL,
+    block_number TEXT NOT NULL
 );

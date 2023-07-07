@@ -26,14 +26,6 @@ modules:
     output:
       type: proto:dcl.Items
 
-  - name: store_collections_items_available
-    kind: store
-    updatePolicy: set
-    valueType: string
-    initialBlock: 7103733
-    inputs:
-      - map: map_add_items_v1
-
   - name: store_collections_v1
     kind: store
     updatePolicy: add
@@ -60,14 +52,6 @@ modules:
     output:
       type: proto:dcl.NFTs
 
-  - name: store_items_mints
-    kind: store
-    updatePolicy: add
-    valueType: int64
-    initialBlock: 7103733
-    inputs:
-      - map: map_issues_v1
-
   - name: store_nfts_item
     kind: store
     initialBlock: 7103733
@@ -85,14 +69,6 @@ modules:
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:dcl.Orders
-
-  - name: store_orders
-    kind: store
-    initialBlock: 7103733
-    updatePolicy: set
-    valueType: string
-    inputs:
-      - map: map_order_created
 
   - name: map_order_executed
     kind: map
@@ -122,10 +98,7 @@ modules:
       - map: map_order_created
       - map: map_order_executed
       - map: map_order_cancelled
-      - store: store_orders
       - store: store_nfts_item
-      - store: store_collections_items_available
-      - store: store_items_mints
       - store: store_collections_v1
     output:
       type: proto:sf.substreams.sink.database.v1.DatabaseChanges

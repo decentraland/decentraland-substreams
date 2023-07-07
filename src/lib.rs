@@ -71,17 +71,15 @@ pub fn map_add_items_v1(
                         value: "0".to_string(),
                     }),
                     beneficiary: constants::ZERO_ADDRESS.to_string(),
-                    raw_metadata: String::new(),         // not used in v1
-                    search_is_collection_approved: true, // not used for v1
-                    minters: [].to_vec(),                // not used for v1
-                    managers: [].to_vec(),               // not used for v1
+                    raw_metadata: String::new(), // not used in v1
+                    minters: [].to_vec(),        // not used for v1
+                    managers: [].to_vec(),       // not used for v1
                     uri: collection_data.7,
                     urn: item_urn.clone(),
                     image: utils::items::get_item_image(&item_urn),
                     created_at: blk.timestamp_seconds(),
                     updated_at: blk.timestamp_seconds(),
                     reviewed_at: blk.timestamp_seconds(),
-                    search_is_store_minter: false, // not used for v1
                     metadata: Some(dcl::Metadata {
                         item_type: utils::items::WEARABLE_V1.to_string(),
                         id: representation.id.clone(),
@@ -100,18 +98,11 @@ pub fn map_add_items_v1(
                     content_hash: None,    // not used for v1
                     first_listed_at: None, // not used for v1
                     sold_at: None,         // not used for v1
+                    block_number: blk.number,
                 }
             })
             .collect(),
     })
-}
-
-/// Store items available amount
-#[substreams::handlers::store]
-pub fn store_collections_items_available(items: dcl::Items, store: StoreSetString) {
-    for item in items.items {
-        store.set(0, item.id, &item.available.unwrap().value);
-    }
 }
 
 #[substreams::handlers::map]
@@ -142,7 +133,6 @@ pub fn map_add_collections_v1(
                 name: collection_data.2,
                 symbol: collection_data.3,
                 is_completed: collection_data.5,
-                is_approved: collection_data.1,
                 is_editable: collection_data.6,
                 minters: [].to_vec(),  //@TODO update this logic
                 managers: [].to_vec(), //@TODO update this logic
@@ -154,7 +144,7 @@ pub fn map_add_collections_v1(
                 updated_at: item.updated_at,
                 reviewed_at: item.reviewed_at,
                 first_listed_at: None,
-                search_is_store_minter: false,
+                block_number: item.block_number,
             }]
             .to_vec(),
         })
@@ -234,6 +224,7 @@ pub fn map_issues_v1(
                                 collection_address: Hex(log.address.clone()).to_string(),
                                 created_at: timestamp.clone(),
                                 updated_at: timestamp,
+                                block_number: blk.number,
                             };
                             nfts.push(nft);
                         } else {
@@ -245,15 +236,6 @@ pub fn map_issues_v1(
         }
     }
     Ok(dcl::NfTs { nfts })
-}
-
-/// Store the amount of nfts minted for the item id
-#[substreams::handlers::store]
-pub fn store_items_mints(nfts: dcl::NfTs, store: StoreAddInt64) {
-    for nft in nfts.nfts {
-        substreams::log::info!("store_items_mints saving item {:?}", nft.item_id);
-        store.add(0, nft.item_id, 1);
-    }
 }
 
 /////// ---- ITEMS V2 ----- ///////
@@ -279,7 +261,6 @@ pub fn map_collection_created(
                     name: collection_data.2,
                     symbol: collection_data.3,
                     is_completed: collection_data.5,
-                    is_approved: collection_data.1,
                     is_editable: collection_data.6,
                     minters: [].to_vec(),
                     managers: [].to_vec(),
@@ -291,7 +272,7 @@ pub fn map_collection_created(
                     updated_at: blk.timestamp_seconds(),
                     reviewed_at: blk.timestamp_seconds(),
                     first_listed_at: None,
-                    search_is_store_minter: false,
+                    block_number: blk.number,
                 }
             })
             .collect(),
@@ -332,6 +313,7 @@ pub fn map_collection_set_approved_event(
                             collection: collection_address.to_string(),
                             new_value: event.new_value,
                             updated_at: timestamp,
+                            block_number: blk.number,
                         };
                         events.push(nft);
                     }
@@ -369,6 +351,7 @@ pub fn map_collection_set_global_minter_event(
                             minter: Hex(event.minter).to_string(),
                             timestamp,
                             value: event.value,
+                            block_number: blk.number,
                         };
                         events.push(nft);
                     }
@@ -395,22 +378,23 @@ pub fn map_collection_set_item_minter_event(
 
             for log in call.logs.iter() {
                 let collection_address = &Hex(log.clone().address).to_string();
-                // if let Some(_collection) = collections_store.get_last(collection_address) {
-                if let Some(event) =
-                    abi::collections_v2::events::SetItemMinter::match_and_decode(log)
-                {
-                    substreams::log::info!("SetItemMinter Event found! {:?}", event);
-                    let timestamp = blk.timestamp_seconds().to_string();
-                    let nft = dcl::SetItemMinterEvent {
-                        item: event.item_id.to_string(),
-                        collection: collection_address.to_string(),
-                        minter: Hex(event.minter).to_string(),
-                        timestamp,
-                        value: event.value.to_string(),
-                    };
-                    events.push(nft);
+                if let Some(_collection) = collections_store.get_last(collection_address) {
+                    if let Some(event) =
+                        abi::collections_v2::events::SetItemMinter::match_and_decode(log)
+                    {
+                        substreams::log::info!("SetItemMinter Event found! {:?}", event);
+                        let timestamp = blk.timestamp_seconds().to_string();
+                        let nft = dcl::SetItemMinterEvent {
+                            item: event.item_id.to_string(),
+                            collection: collection_address.to_string(),
+                            minter: Hex(event.minter).to_string(),
+                            timestamp,
+                            value: event.value.to_string(),
+                            block_number: blk.number,
+                        };
+                        events.push(nft);
+                    }
                 }
-                // }
             }
         }
     }
@@ -449,6 +433,7 @@ pub fn map_issues(
                             collection_address: Hex(log.address.clone()).to_string(),
                             created_at: timestamp.clone(),
                             updated_at: timestamp,
+                            block_number: blk.number,
                         };
                         nfts.push(nft);
                     }
@@ -533,7 +518,6 @@ pub fn map_add_items(
                     beneficiary: Hex(beneficiary).to_string(),
                     content_hash: Some(content_hash),
                     raw_metadata: metadata.clone(),
-                    search_is_collection_approved: collection_data.1,
                     minters: [].to_vec(),  //@TODO update this logic
                     managers: [].to_vec(), //@TODO update this logic
                     uri: collection_data.7,
@@ -542,11 +526,11 @@ pub fn map_add_items(
                     created_at: blk.timestamp_seconds(),
                     updated_at: blk.timestamp_seconds(),
                     reviewed_at: blk.timestamp_seconds(),
-                    search_is_store_minter: false,
                     metadata: None, // it gets set later
                     item_type: utils::items::get_item_type_from_metadata(metadata).item_type,
                     sold_at: None,
                     first_listed_at: None, //@TODO: Add this logic
+                    block_number: blk.number,
                 };
                 item.metadata = Some(utils::items::build_metadata(&item));
                 item
@@ -617,12 +601,6 @@ pub fn map_order_created(
 }
 
 /// Store addresses of the orders by nft_id created by map_order_created
-#[substreams::handlers::store]
-pub fn store_orders(orders: dcl::Orders, store: StoreSetString) {
-    for order in orders.orders {
-        store.set(0, order.nft, &order.id);
-    }
-}
 
 // Reads the Marketplacev2 order execution by the `OrderSuccessful` event
 #[substreams::handlers::map]
@@ -707,10 +685,7 @@ fn db_out(
     orders: dcl::Orders,
     orders_executed: dcl::Orders,
     orders_cancelled: dcl::Orders,
-    store_orders: StoreGetString,
     store_nfts_item: StoreGetString,
-    store_collections_items_available: StoreGetString,
-    store_items_mints: StoreGetInt64,
     store_collections_v1: StoreGetInt64,
 ) -> Result<DatabaseChanges, substreams::errors::Error> {
     // let mut database_changes: DatabaseChanges = Default::default();
@@ -723,19 +698,11 @@ fn db_out(
     db::items::transform_item_database_changes(network, &mut tables, items, store_collections_v1);
     // NFTs
     log::info!("In db out nfts {:?}", nfts);
-    db::nfts::transform_nfts_database_changes(&mut tables, nfts.clone());
-    // get the item available count based on nfts minted
-    db::items::update_item_available(
-        &mut tables,
-        nfts,
-        store_items_mints,
-        store_collections_items_available,
-    );
+    db::nfts::transform_nfts_database_changes(&mut tables, nfts);
     // Orders
     log::info!("In db out orders {:?}", orders);
     db::orders::transform_orders_database_changes(
         &mut tables,
-        store_orders,
         store_nfts_item,
         orders,
         orders_executed,
@@ -756,10 +723,7 @@ fn db_out_polygon(
     orders: dcl::Orders,
     orders_executed: dcl::Orders,
     orders_cancelled: dcl::Orders,
-    store_orders: StoreGetString,
     store_nfts_item: StoreGetString,
-    store_collections_items_available: StoreGetString,
-    store_items_mints: StoreGetInt64,
 ) -> Result<DatabaseChanges, substreams::errors::Error> {
     // let mut database_changes: DatabaseChanges = Default::default();
     let mut tables = substreams_database_change::tables::Tables::new();
@@ -771,30 +735,22 @@ fn db_out_polygon(
     db::items::transform_item_v2_database_changes(&mut tables, items);
     // NFTs
     log::info!("In db out nfts {:?}", nfts);
-    db::nfts::transform_nfts_database_changes(&mut tables, nfts.clone());
+    db::nfts::transform_nfts_database_changes(&mut tables, nfts);
     // SetApprovedEvents
     log::info!("In db out set_events_approved {:?}", set_approved_events);
-    db::collections::update_collection_is_approved(&mut tables, set_approved_events);
+    db::collections::insert_collection_is_approved_event(&mut tables, set_approved_events);
     // SetStoreMinterEvenbts
     log::info!("In db out set_store_minter {:?}", set_store_minter_events);
-    db::collections::update_collection_search_is_store_minter(&mut tables, set_store_minter_events);
+    db::collections::insert_collection_search_is_store_minter(&mut tables, set_store_minter_events);
     log::info!(
         "In db out set_item_minter_event {:?}",
         set_item_minter_event
     );
     db::items::update_item_minter(&mut tables, set_item_minter_event);
-    // get the item available count based on nfts minted
-    db::items::update_item_available(
-        &mut tables,
-        nfts,
-        store_items_mints,
-        store_collections_items_available,
-    );
     // Orders
     log::info!("In db out orders {:?}", orders);
     db::orders::transform_orders_database_changes(
         &mut tables,
-        store_orders,
         store_nfts_item,
         orders,
         orders_executed,

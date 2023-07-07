@@ -1,14 +1,8 @@
+use crate::dcl_hex;
 use crate::pb::dcl;
-use crate::{dcl_hex, utils};
 use substreams::prelude::BigInt;
 use substreams::store::StoreGet;
 use substreams_database_change::tables::Tables;
-
-pub fn cancel_nft_order(changes: &mut Tables, order_id: String) {
-    changes
-        .update_row("orders", dcl_hex!(order_id))
-        .set("status", utils::orders::ORDER_CANCELLED);
-}
 
 pub fn transform_orders_status_database_changes(changes: &mut Tables, orders: dcl::Orders) {
     for order in orders.orders {
@@ -76,28 +70,12 @@ pub fn transform_orders_created_database_changes(
 
 pub fn transform_orders_database_changes(
     changes: &mut Tables,
-    store_orders: substreams::store::StoreGetString,
     nfts_item_store: substreams::store::StoreGetString,
     orders_created: dcl::Orders,
     orders_executed: dcl::Orders,
     orders_cancelled: dcl::Orders,
 ) {
-    transform_orders_created_database_changes(changes, orders_created.clone(), nfts_item_store);
-    // this replaces the logic of cancelActiveOrder that cancels any active order
-    if !orders_created.orders.is_empty() {
-        for order in orders_created.orders {
-            match store_orders.get_first(order.nft) {
-                Some(active_order) => {
-                    substreams::log::info!(
-                        "There's an active order in the store {:?}",
-                        active_order
-                    );
-                    cancel_nft_order(changes, active_order)
-                }
-                None => continue,
-            }
-        }
-    }
+    transform_orders_created_database_changes(changes, orders_created, nfts_item_store);
     substreams::log::info!("In db out orders_executed {:?}", orders_executed);
     transform_orders_status_database_changes(changes, orders_executed);
     substreams::log::info!("In db out orders_cancelled {:?}", orders_cancelled);

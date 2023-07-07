@@ -36,8 +36,7 @@ message Item {
   uint64 reviewed_at = 23;
   optional uint64 sold_at = 24;
   optional uint64 first_listed_at = 25;
-  bool search_is_store_minter = 26;
-  bool search_is_collection_approved = 27;
+  uint64 block_number = 26; 
 }
 
 message Collections {
@@ -51,22 +50,22 @@ message Collection {
     string creator = 4;
     string owner = 5;
     bool is_completed = 6;
-    bool is_approved = 7;
-    bool is_editable = 8;
-    repeated string minters = 9;
-    repeated string managers = 10;
-    string urn = 11;
-    uint64 created_at = 12;
-    uint64 updated_at = 13;
-    uint64 reviewed_at = 14;
-    optional uint64 first_listed_at = 15;
-    bool search_is_store_minter = 16;
+    bool is_editable = 7;
+    repeated string minters = 8;
+    repeated string managers = 9;
+    string urn = 10;
+    uint64 created_at = 11;
+    uint64 updated_at = 12;
+    uint64 reviewed_at = 13;
+    optional uint64 first_listed_at = 14;
+    uint64 block_number = 15;
 }
 
 message CollectionSetApprovedEvent {
     string collection = 1;
     bool new_value = 2;
     string updated_at = 3;
+    uint64 block_number = 4;
 }
 
 message CollectionSetApprovedEvents {
@@ -78,6 +77,7 @@ message CollectionSetGlobalMinterEvent {
   string minter = 2;
   bool value = 3;
   string timestamp = 4;
+  uint64 block_number = 5;
 }
 
 message CollectionSetGlobalMinterEvents {
@@ -90,6 +90,7 @@ message SetItemMinterEvent {
   string minter = 3;
   string value = 4;
   string timestamp = 5;
+  uint64 block_number = 6;
 }
 
 message SetItemMinterEvents {
@@ -114,6 +115,7 @@ message NFT {
     string collection_address = 6;
     string created_at = 7;
     string updated_at = 8;
+    uint64 block_number = 9;
 }
   
 

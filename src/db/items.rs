@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-
 use crate::pb::dcl;
 use crate::utils::sanitize_sql_string;
 use crate::{dcl_hex, utils::format_postgres_array};
 use substreams::prelude::BigInt;
-use substreams::store::{StoreGet, StoreGetInt64, StoreGetString};
+use substreams::store::{StoreGet, StoreGetInt64};
 use substreams_database_change::tables::Tables;
 
 fn get_item_changes(changes: &mut Tables, item: dcl::Item, blockchain_id: Option<i64>) {
@@ -62,11 +60,7 @@ fn get_item_changes(changes: &mut Tables, item: dcl::Item, blockchain_id: Option
         .set("updated_at", item.updated_at)
         .set("sold_at", item.sold_at.unwrap_or(0))
         .set("first_listed_at", item.first_listed_at.unwrap_or(0))
-        .set("search_is_store_minter", item.search_is_store_minter)
-        .set(
-            "search_is_collection_approved",
-            item.search_is_collection_approved,
-        );
+        .set("block_number", item.block_number);
 
     // metadata wearable change
     if let Some(wearable) = metadata.wearable {
@@ -134,48 +128,15 @@ pub fn transform_item_database_changes(
     }
 }
 
-pub fn update_item_available(
-    changes: &mut Tables,
-    nfts: dcl::NfTs,
-    store_items_v1_mints: StoreGetInt64,
-    store_collections_v1_items_available: StoreGetString,
-) {
-    let mut subtracted_map: HashMap<String, i64> = HashMap::new();
-    for nft in nfts.nfts {
-        match store_items_v1_mints.get_last(nft.item_id.clone()) {
-            Some(minted) => {
-                substreams::log::info!("nft.item_id: {:?}", nft.item_id);
-                substreams::log::info!("minted: {:?}", minted);
-                match store_collections_v1_items_available.get_last(nft.item_id.clone()) {
-                    Some(available) => {
-                        substreams::log::info!("available: {:?}", available);
-                        let subtracted: i64 = available.parse::<i64>().unwrap() - minted;
-                        substreams::log::info!("subtracted: {:?}", subtracted);
-                        subtracted_map.insert(nft.item_id.clone(), subtracted);
-                    }
-                    None => continue,
-                }
-            }
-            None => continue,
-        }
-    }
-
-    substreams::log::info!("subtracted_map: {:?}", subtracted_map);
-
-    for (item_id, subtracted) in subtracted_map {
-        changes
-            .update_row("items", item_id)
-            .set("available", subtracted.to_string());
-    }
-}
-
 pub fn update_item_minter(changes: &mut Tables, events: dcl::SetItemMinterEvents) {
     for event in events.events {
         let item = format!("0x{}-{}", event.collection, event.item);
         changes
-            .create_row("item_minters", item)
+            .create_row("item_minters", format!("{}-{}", item, event.timestamp))
+            .set("item_id", item)
             .set("minter", dcl_hex!(event.minter))
             .set("value", event.value.parse::<i64>().unwrap() > 0)
-            .set("updated_at", event.timestamp);
+            .set("timestamp", event.timestamp)
+            .set("block_number", event.block_number);
     }
 }

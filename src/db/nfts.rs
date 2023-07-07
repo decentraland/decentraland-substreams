@@ -30,6 +30,7 @@ pub fn transform_nfts_database_changes(changes: &mut Tables, nfts: dcl::NfTs) {
             )
             .set("created_at", nft.created_at)
             .set("updated_at", nft.updated_at)
-            .set("owner", dcl_hex!(nft.beneficiary));
+            .set("owner", dcl_hex!(nft.beneficiary))
+            .set("block_number", nft.block_number);
     }
 }

@@ -102,7 +102,8 @@ CREATE TABLE orders (
     status TEXT NOT NULL,
     expires_at numeric NOT NULL,
     created_at numeric NOT NULL,
-    updated_at numeric NOT NULL block_number TEXT NOT NULL
+    updated_at numeric NOT NULL,
+    block_number TEXT NOT NULL
 );
 CREATE TABLE nfts (
     id TEXT NOT NULL PRIMARY KEY,

@@ -15,6 +15,7 @@ run_process() {
 read -p "Enter the network: (goerli, mainnet or polygon) " network
 read -p "Enter the PostgreSQL connection string: " psql_string
 read -p "Enter the PostgreSQL schema to sink to: " psql_schema
+read -p "Enter the spkg url or yaml: " spkg_string
 
 # Determine the db_out parameter based on the network
 if [ "$network" = "polygon" ]; then
@@ -24,7 +25,7 @@ else
 fi
 
 # Run the process for the specified network
-run_process "./substreams-sink-postgres run $psql_string&schema=$psql_schema $network.streamingfast.io:443 substreams-$network.yaml $db_out --metrics-listen-addr=0.0.0.0:9102" $network-sink-pid.txt logs-$network.txt &
+run_process "./substreams-sink-postgres run $psql_string&schema=$psql_schema $network.streamingfast.io:443 $spkg_string $db_out --metrics-listen-addr=0.0.0.0:9102" $network-sink-pid.txt logs-$network.txt &
 
 # Print the PID file for reference
 echo "Process PID file: $network-sink-pid.txt"

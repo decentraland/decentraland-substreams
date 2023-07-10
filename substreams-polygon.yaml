@@ -19,7 +19,7 @@ binaries:
 modules:
   - name: map_collection_created
     kind: map
-    initialBlock: 22520028 # This is the when the first collection was created
+    initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
     output:
@@ -27,7 +27,7 @@ modules:
 
   - name: store_collections
     kind: store
-    initialBlock: 22520028
+    initialBlock: 15202000
     updatePolicy: set
     valueType: string
     inputs:
@@ -35,7 +35,7 @@ modules:
 
   - name: map_collection_set_approved_event
     kind: map
-    initialBlock: 22520028
+    initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections
@@ -44,7 +44,7 @@ modules:
 
   - name: map_collection_set_global_minter_event
     kind: map
-    initialBlock: 22520028
+    initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections
@@ -53,7 +53,7 @@ modules:
 
   - name: map_collection_set_item_minter_event
     kind: map
-    initialBlock: 22520028
+    initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections
@@ -62,7 +62,7 @@ modules:
 
   - name: map_issues
     kind: map
-    initialBlock: 22520028
+    initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections
@@ -71,7 +71,7 @@ modules:
 
   - name: store_nfts_item
     kind: store
-    initialBlock: 22520028
+    initialBlock: 15202000
     updatePolicy: set
     valueType: string
     inputs:
@@ -79,7 +79,7 @@ modules:
 
   - name: map_add_items
     kind: map
-    initialBlock: 22520028
+    initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
       - map: map_collection_created # depends on the map and not store because the AddItem happens in the same block as the ProxyCreated event, so the store won't have the address yet
@@ -89,7 +89,7 @@ modules:
   # Orders
   - name: map_order_created
     kind: map
-    initialBlock: 22520028
+    initialBlock: 15202000
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -98,7 +98,7 @@ modules:
 
   - name: map_order_executed
     kind: map
-    initialBlock: 22520028
+    initialBlock: 15202000
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -107,7 +107,7 @@ modules:
 
   - name: map_order_cancelled
     kind: map
-    initialBlock: 22520028
+    initialBlock: 15202000
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -115,7 +115,7 @@ modules:
       type: proto:dcl.Orders
 
   - name: db_out_polygon
-    initialBlock: 22520028
+    initialBlock: 15202000
     kind: map
     inputs:
       - map: map_collection_created

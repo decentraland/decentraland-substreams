@@ -64,13 +64,13 @@ create TABLE items (
     block_number TEXT NOT NULL
 );
 CREATE TABLE metadata (
-    id text NOT NULL,
+    id text NOT NULL PRIMARY KEY,
     item_type TEXT NOT NULL,
     wearable text,
     emote text
 );
 CREATE TABLE wearable (
-    id text NOT NULL,
+    id text NOT NULL PRIMARY KEY,
     name text NOT NULL,
     description text NOT NULL,
     collection text NOT NULL,
@@ -79,7 +79,7 @@ CREATE TABLE wearable (
     body_shapes text []
 );
 CREATE TABLE emote (
-    id text NOT NULL,
+    id text NOT NULL PRIMARY KEY,
     name text NOT NULL,
     description text NOT NULL,
     collection text NOT NULL,

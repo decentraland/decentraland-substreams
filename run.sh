@@ -21,12 +21,15 @@ read -p "Enter the spkg url or yaml: " spkg_string
 case $network in
     "polygon")
         prometheus_port="9102"
+        network_url="polygon.streamingfast.io:443"
         ;;
     "mainnet")
         prometheus_port="9103"
+        network_url="mainnet.eth.streamingfast.io:443"
         ;;
     "goerli")
         prometheus_port="9104"
+        network_url="goerli.eth.streamingfast.io:443"
         ;;
     *)
         echo "Invalid network provided!"
@@ -42,7 +45,7 @@ else
 fi
 
 # Run the process for the specified network
-run_process "./substreams-sink-postgres run $psql_string&schema=$psql_schema $network.streamingfast.io:443 $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port" $network-sink-pid.txt logs-$network.txt &
+run_process "./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port" $network-sink-pid.txt logs-$network.txt &
 
 # Print the Prometheus port for reference
 echo "Prometheus metrics exported on port: $prometheus_port"

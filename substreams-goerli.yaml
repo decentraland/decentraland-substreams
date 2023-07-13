@@ -92,6 +92,7 @@ modules:
     initialBlock: 7103733
     kind: map
     inputs:
+      - params: string
       - map: map_add_collections_v1
       - map: map_add_items_v1
       - map: map_issues_v1
@@ -104,6 +105,7 @@ modules:
       type: proto:sf.substreams.sink.database.v1.DatabaseChanges
 
 params:
+  db_out: "goerli"
   map_add_items_v1: "goerli"
   map_order_created: "goerli"
   map_order_executed: "goerli"

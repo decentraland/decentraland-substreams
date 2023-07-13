@@ -58,5 +58,6 @@ pub fn find_wearable(wearable_id: &str) -> Option<wearable::Wearable> {
             }
         }
     }
+    substreams::log::info!("wearable not found {:?}", wearable_id);
     None
 }

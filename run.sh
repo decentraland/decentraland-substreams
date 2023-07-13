@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Function to run the CLI command and save the PID to a file
@@ -15,7 +14,7 @@ run_process() {
 read -p "Enter the network: (mainnet, goerli, polygon or mumbai) " network
 read -p "Enter the PostgreSQL connection string: " psql_string
 read -p "Enter the PostgreSQL schema to sink to: " psql_schema
-read -p "Enter the spkg url or yaml: " spkg_string
+read -p "Enter the spkg URL or yaml: " spkg_string
 
 # Set the prometheus_port and db_out based on the network
 case $network in
@@ -45,8 +44,15 @@ case $network in
         ;;
 esac
 
+# Check if the flag is provided in the script call
+if [[ "$*" == *"--on-module-hash-mistmatch=warn"* ]]; then
+    run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port --on-module-hash-mistmatch=warn"
+else
+    run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port"
+fi
+
 # Run the process for the specified network
-run_process "./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port" $network-sink-pid.txt logs-$network.txt &
+run_process "$run_command" "$network-sink-pid.txt" "logs-$network.txt" &
 
 # Print the Prometheus port for reference
 echo "Prometheus metrics exported on port: $prometheus_port"

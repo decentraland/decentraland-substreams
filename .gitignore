@@ -7,3 +7,5 @@ buf.gen.yaml
 substreams
 /scripts/node_modules
 /scripts/dist/*
+logs-*
+*-*-pid.txt

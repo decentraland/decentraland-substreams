@@ -12,37 +12,38 @@ run_process() {
 }
 
 # Prompt the user to enter the network
-read -p "Enter the network: (goerli, mainnet or polygon) " network
+read -p "Enter the network: (mainnet, goerli, polygon or mumbai) " network
 read -p "Enter the PostgreSQL connection string: " psql_string
 read -p "Enter the PostgreSQL schema to sink to: " psql_schema
 read -p "Enter the spkg url or yaml: " spkg_string
 
-# Set the prometheus_port based on the network
+# Set the prometheus_port and db_out based on the network
 case $network in
     "polygon")
         prometheus_port="9102"
         network_url="polygon.streamingfast.io:443"
+        db_out="db_out_polygon"
         ;;
     "mainnet")
         prometheus_port="9103"
         network_url="mainnet.eth.streamingfast.io:443"
+        db_out="db_out"
         ;;
     "goerli")
         prometheus_port="9104"
         network_url="goerli.eth.streamingfast.io:443"
+        db_out="db_out"
+        ;;
+    "mumbai")
+        prometheus_port="9105"
+        network_url="mumbai.streamingfast.io:443"
+        db_out="db_out_polygon"
         ;;
     *)
         echo "Invalid network provided!"
         exit 1
         ;;
 esac
-
-# Determine the db_out parameter based on the network
-if [ "$network" = "polygon" ]; then
-    db_out="db_out_polygon"
-else
-    db_out="db_out"
-fi
 
 # Run the process for the specified network
 run_process "./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port" $network-sink-pid.txt logs-$network.txt &

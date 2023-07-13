@@ -8,7 +8,8 @@ mod rpc;
 mod utils;
 
 use constants::{
-    COLLECTIONS_FACTORY, COLLECTIONS_V3_FACTORY, MARKETPLACEV2_CONTRACT,
+    COLLECTIONS_FACTORY, COLLECTIONS_FACTORY_MUMBAI, COLLECTIONS_V3_FACTORY,
+    COLLECTIONS_V3_FACTORY_MUMBAI, MARKETPLACEV2_CONTRACT, MARKETPLACEV2_CONTRACT_MUMBAI,
     MARKETPLACE_GOERLI_CONTRACT, MARKETPLACE_MAINNET_CONTRACT,
 };
 use data::constants::collections_v1;
@@ -240,17 +241,28 @@ pub fn map_issues_v1(
 
 /////// ---- ITEMS V2 ----- ///////
 
+fn get_factories_contracts(network: &str) -> [&[u8]; 2] {
+    if network == "mumbai" {
+        [
+            &COLLECTIONS_FACTORY_MUMBAI[..],
+            &COLLECTIONS_V3_FACTORY_MUMBAI[..],
+        ]
+    } else {
+        [&COLLECTIONS_FACTORY[..], &COLLECTIONS_V3_FACTORY[..]]
+    }
+}
+
 /// Reads the collection creation by the `ProxyCreated` event
 #[substreams::handlers::map]
 pub fn map_collection_created(
+    network: String,
     blk: eth::Block,
 ) -> Result<dcl::Collections, substreams::errors::Error> {
     Ok(dcl::Collections {
         collections: blk
-            .events::<abi::collection_factoryv3::events::ProxyCreated>(&[
-                &COLLECTIONS_FACTORY,
-                &COLLECTIONS_V3_FACTORY,
-            ])
+            .events::<abi::collection_factoryv3::events::ProxyCreated>(&get_factories_contracts(
+                &network,
+            ))
             .map(|(event, _log)| {
                 substreams::log::info!("Collection created {:?}", event);
                 let collection_data = rpc::collection_data_call(event.address.clone()); //@TODO avoid clone?
@@ -540,12 +552,13 @@ pub fn map_add_items(
 }
 
 // ORDERS
-
 fn get_marketplace_contract(network: String) -> [u8; 20] {
     if network == "goerli" {
         MARKETPLACE_GOERLI_CONTRACT
     } else if network == "mainnet" {
         MARKETPLACE_MAINNET_CONTRACT
+    } else if network == "mumbai" {
+        MARKETPLACEV2_CONTRACT_MUMBAI
     } else {
         MARKETPLACEV2_CONTRACT
     }

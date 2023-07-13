@@ -83,6 +83,14 @@ pub fn moonshot_2020() -> Vec<Wearable> {
             body_shapes: vec![String::from("BaseMale"), String::from("BaseFemale")],
         },
         Wearable {
+            id: String::from("ms_gamecredits_upper_body"),
+            name: String::from("Game Credits Soccer T-Shirt"),
+            description: String::from("Game Credits Soccer T-Shirt - Moonshot Tournament 2020"),
+            category: String::from("upper_body"),
+            rarity: String::from("legendary"),
+            body_shapes: vec![String::from("BaseMale"), String::from("BaseFemale")],
+        },
+        Wearable {
             id: String::from("ms_knownorigin_upper_body"),
             name: String::from("Known Origin Soccer T-Shirt"),
             description: String::from("Known Origin Soccer T-Shirt - Moonshot Tournament 2020"),

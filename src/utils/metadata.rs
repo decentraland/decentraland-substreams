@@ -1,20 +1,23 @@
-use crate::pb::dcl::{Emote, Item, Wearable};
+use crate::pb::dcl::{Emote, Wearable};
 
-pub fn build_wearable_item(item: &Item) -> Option<Wearable> {
-    let id = item.id.clone();
-    let data: Vec<&str> = item.raw_metadata.split(':').collect();
+pub fn build_wearable_item(
+    item_id: &str,
+    raw_metadata: &str,
+    collection: &str,
+) -> Option<Wearable> {
+    let id = item_id.to_string();
+    let data: Vec<&str> = raw_metadata.split(':').collect();
 
     if (data.len() == 6 || data.len() == 8)
         && is_valid_wearable_category(data[4])
         && is_valid_body_shape(&data[5].split(',').collect::<Vec<&str>>()[..])
     {
         let wearable = Wearable {
-            id: id.clone(),
+            id,
             name: data[2].to_string(),
             description: data[3].to_string(),
-            collection: item.collection.clone(),
+            collection: collection.to_string(),
             category: data[4].to_string(),
-            rarity: item.rarity.to_string(),
             body_shapes: data[5]
                 .split(',')
                 .map(|s| s.to_string())
@@ -51,19 +54,18 @@ fn is_valid_body_shape(body_shapes: &[&str]) -> bool {
 
 // Emotes
 
-pub fn build_emote_item(item: &Item) -> Option<Emote> {
-    let id = item.id.clone();
-    let data: Vec<&str> = item.raw_metadata.split(':').collect();
+pub fn build_emote_item(item_id: &str, raw_metadata: &str, collection: &str) -> Option<Emote> {
+    let id = item_id.to_string();
+    let data: Vec<&str> = raw_metadata.split(':').collect();
     let data_has_valid_length = data.len() == 6 || data.len() == 7 || data.len() == 8;
 
     if data_has_valid_length && is_valid_body_shape(&data[5].split(',').collect::<Vec<&str>>()[..])
     {
         let emote = Emote {
-            id: id.clone(),
-            collection: item.collection.clone(),
+            id,
+            collection: collection.to_string(),
             name: data[2].to_string(),
             description: data[3].to_string(),
-            rarity: item.rarity.to_string(),
             category: if is_valid_emote_category(data[4]) {
                 data[4].to_string()
             } else {

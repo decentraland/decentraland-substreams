@@ -38,6 +38,7 @@ modules:
     kind: map
     initialBlock: 8828687
     inputs:
+      - params: string
       - map: map_add_items_v1
       - store: store_collections_v1
     output:
@@ -106,6 +107,7 @@ modules:
 
 params:
   db_out: "mainnet"
+  map_add_collections_v1: "mainnet"
   map_add_items_v1: "mainnet"
   map_order_created: "mainnet"
   map_order_executed: "mainnet"

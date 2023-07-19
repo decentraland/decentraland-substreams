@@ -84,6 +84,20 @@ message CollectionSetGlobalMinterEvents {
     repeated CollectionSetGlobalMinterEvent events = 1;
 }
 
+message ItemUpdateDataEvent {
+  string collection = 1;
+  string item = 2;
+  BigInt price = 3;
+  string beneficiary = 4;
+  string raw_metadata = 5;
+  uint64 timestamp = 6;
+  uint64 block_number = 7;
+}
+
+message ItemUpdateDataEvents {
+    repeated ItemUpdateDataEvent events = 1;
+}
+
 message SetItemMinterEvent {
   string item = 1;
   string collection = 2;
@@ -163,8 +177,7 @@ message Wearable {
   string description = 3;
   string collection = 4;
   string category = 5;
-  string rarity = 6;
-  repeated string body_shapes = 7;
+  repeated string body_shapes = 6;
 }
 
 message Emote {
@@ -174,8 +187,7 @@ message Emote {
   string collection = 4;
   string category = 5;
   bool loop = 6;
-  string rarity = 7;
-  repeated string body_shapes = 8;
+  repeated string body_shapes = 7;
 }
 
 enum WearableCategory {

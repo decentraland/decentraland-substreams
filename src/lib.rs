@@ -26,7 +26,8 @@ use crate::utils::sanitize_sql_string;
 
 substreams_ethereum::init!();
 
-/////// ---- ITEMS V1 ----- ///////
+/////// ---- ITEMS V1 (Ethereum ones) ----- ///////
+
 #[substreams::handlers::map]
 pub fn map_add_items_v1(
     network: String,
@@ -90,7 +91,6 @@ pub fn map_add_items_v1(
                             description: representation.description,
                             collection: collection_address,
                             category: representation.category,
-                            rarity: representation.rarity,
                             body_shapes: representation.body_shapes,
                         }),
                         emote: None,
@@ -108,6 +108,7 @@ pub fn map_add_items_v1(
 
 #[substreams::handlers::map]
 pub fn map_add_collections_v1(
+    network: String,
     items: dcl::Items,
     collections_v1_store: StoreGetInt64,
 ) -> Result<dcl::Collections, substreams::errors::Error> {
@@ -137,10 +138,7 @@ pub fn map_add_collections_v1(
                 is_editable: collection_data.6,
                 minters: [].to_vec(),  //@TODO update this logic
                 managers: [].to_vec(), //@TODO update this logic
-                urn: utils::urn::get_urn_for_collection_v2(
-                    &collection_address,
-                    "goerli".to_string(), //@TODO: unharcode this
-                ),
+                urn: utils::urn::get_urn_for_collection_v2(&collection_address, &network),
                 created_at: item.created_at,
                 updated_at: item.updated_at,
                 reviewed_at: item.reviewed_at,
@@ -258,14 +256,13 @@ pub fn map_collection_created(
     network: String,
     blk: eth::Block,
 ) -> Result<dcl::Collections, substreams::errors::Error> {
+    let contracts = get_factories_contracts(&network);
     Ok(dcl::Collections {
         collections: blk
-            .events::<abi::collection_factoryv3::events::ProxyCreated>(&get_factories_contracts(
-                &network,
-            ))
+            .events::<abi::collection_factory::events::ProxyCreated>(&contracts)
             .map(|(event, _log)| {
                 substreams::log::info!("Collection created {:?}", event);
-                let collection_data = rpc::collection_data_call(event.address.clone()); //@TODO avoid clone?
+                let collection_data = rpc::collection_data_call(event.address.clone());
                 dcl::Collection {
                     address: Hex(event.address.clone()).to_string(),
                     owner: collection_data.4,
@@ -278,7 +275,7 @@ pub fn map_collection_created(
                     managers: [].to_vec(),
                     urn: utils::urn::get_urn_for_collection_v2(
                         &Hex(event.address).to_string(),
-                        "polygon".to_string(), //@TODO: fix me
+                        &network,
                     ),
                     created_at: blk.timestamp_seconds(),
                     updated_at: blk.timestamp_seconds(),
@@ -334,6 +331,45 @@ pub fn map_collection_set_approved_event(
         }
     }
     Ok(dcl::CollectionSetApprovedEvents { events })
+}
+
+// Reads the SetGlobalMinter Event for collections v2
+#[substreams::handlers::map]
+pub fn map_item_update_data_event(
+    blk: eth::Block,
+    collections_store: substreams::store::StoreGetString,
+) -> Result<dcl::ItemUpdateDataEvents, substreams::errors::Error> {
+    let mut events: Vec<dcl::ItemUpdateDataEvent> = vec![];
+    for trx in blk.transactions() {
+        for call in trx.calls.iter() {
+            let _call_index = call.index;
+            if call.state_reverted {
+                continue;
+            }
+
+            for log in call.logs.iter() {
+                let collection_address = &Hex(log.clone().address).to_string();
+                if let Some(_collection) = collections_store.get_last(collection_address) {
+                    if let Some(event) =
+                        abi::collections_v2::events::UpdateItemData::match_and_decode(log)
+                    {
+                        substreams::log::info!("UpdateItemData Event found! {:?}", event);
+                        let timestamp = blk.timestamp_seconds();
+                        events.push(dcl::ItemUpdateDataEvent {
+                            collection: collection_address.to_string(),
+                            beneficiary: Hex(&event.beneficiary).to_string(),
+                            item: event.item_id.to_string(),
+                            raw_metadata: event.metadata,
+                            price: Some(event.price.into()),
+                            block_number: blk.number,
+                            timestamp,
+                        });
+                    }
+                }
+            }
+        }
+    }
+    Ok(dcl::ItemUpdateDataEvents { events })
 }
 
 // Reads the SetGlobalMinter Event for collections v2
@@ -456,7 +492,7 @@ pub fn map_issues(
     Ok(dcl::NfTs { nfts })
 }
 
-/// Store addresses of the collections created by map_collection_created
+/// Store item_id by nft_id created by map_issues
 #[substreams::handlers::store]
 pub fn store_nfts_item(nfts: dcl::NfTs, store: StoreSetString) {
     for nft in nfts.nfts {
@@ -472,6 +508,7 @@ pub fn store_nfts_item(nfts: dcl::NfTs, store: StoreSetString) {
 /// Reads item creationg by the `AddItem` event
 #[substreams::handlers::map]
 pub fn map_add_items(
+    network: String,
     blk: eth::Block,
     collections: dcl::Collections,
 ) -> Result<dcl::Items, substreams::errors::Error> {
@@ -506,19 +543,16 @@ pub fn map_add_items(
                     content_hash,
                 } = item;
                 sanitize_sql_string(metadata.clone());
-                let item_urn = utils::urn::get_urn_for_collection_v2(
-                    &collection_address,
-                    "mumbai".to_string(),
-                );
+                let item_urn = utils::urn::get_urn_for_collection_v2(&collection_address, &network);
                 let item_id = utils::get_item_id(
                     Hex(log.address()).to_string(),
                     add_item_event.item_id.to_string(),
                 );
                 let mut item = dcl::Item {
-                    id: item_id,
+                    id: item_id.clone(),
                     creator: collection_data.0,
-                    blockchain_id: BigInt::to_u64(&add_item_event.item_id) as i64, //@TODO: check if works in runtime
-                    collection: collection_address,
+                    blockchain_id: BigInt::to_u64(&add_item_event.item_id) as i64,
+                    collection: collection_address.clone(),
                     creation_fee: Some(dcl::BigInt {
                         value: "0".to_string(),
                     }),
@@ -539,12 +573,17 @@ pub fn map_add_items(
                     updated_at: blk.timestamp_seconds(),
                     reviewed_at: blk.timestamp_seconds(),
                     metadata: None, // it gets set later
-                    item_type: utils::items::get_item_type_from_metadata(metadata).item_type,
+                    item_type: utils::items::get_item_type_from_metadata(metadata.clone())
+                        .item_type,
                     sold_at: None,
                     first_listed_at: None, //@TODO: Add this logic
                     block_number: blk.number,
                 };
-                item.metadata = Some(utils::items::build_metadata(&item));
+                item.metadata = Some(utils::items::build_metadata(
+                    &item_id,
+                    &metadata,
+                    &collection_address,
+                ));
                 item
             })
             .collect(),
@@ -612,8 +651,6 @@ pub fn map_order_created(
 
     Ok(dcl::Orders { orders })
 }
-
-/// Store addresses of the orders by nft_id created by map_order_created
 
 // Reads the Marketplacev2 order execution by the `OrderSuccessful` event
 #[substreams::handlers::map]
@@ -701,7 +738,6 @@ fn db_out(
     store_nfts_item: StoreGetString,
     store_collections_v1: StoreGetInt64,
 ) -> Result<DatabaseChanges, substreams::errors::Error> {
-    // let mut database_changes: DatabaseChanges = Default::default();
     let mut tables = substreams_database_change::tables::Tables::new();
     // Collections
     log::info!("In db out collections {:?}", collections);
@@ -733,12 +769,12 @@ fn db_out_polygon(
     set_approved_events: dcl::CollectionSetApprovedEvents,
     set_store_minter_events: dcl::CollectionSetGlobalMinterEvents,
     set_item_minter_event: dcl::SetItemMinterEvents,
+    update_item_data_events: dcl::ItemUpdateDataEvents,
     orders: dcl::Orders,
     orders_executed: dcl::Orders,
     orders_cancelled: dcl::Orders,
     store_nfts_item: StoreGetString,
 ) -> Result<DatabaseChanges, substreams::errors::Error> {
-    // let mut database_changes: DatabaseChanges = Default::default();
     let mut tables = substreams_database_change::tables::Tables::new();
     // Collections
     log::info!("In db out collections {:?}", collections);
@@ -752,14 +788,22 @@ fn db_out_polygon(
     // SetApprovedEvents
     log::info!("In db out set_events_approved {:?}", set_approved_events);
     db::collections::insert_collection_is_approved_event(&mut tables, set_approved_events);
-    // SetStoreMinterEvenbts
+    // SetStoreMinterEvents
     log::info!("In db out set_store_minter {:?}", set_store_minter_events);
     db::collections::insert_collection_search_is_store_minter(&mut tables, set_store_minter_events);
+    // SetItemMinterEvents
     log::info!(
         "In db out set_item_minter_event {:?}",
         set_item_minter_event
     );
     db::items::update_item_minter(&mut tables, set_item_minter_event);
+    //
+    log::info!(
+        "In db out update_item_data_events {:?}",
+        update_item_data_events
+    );
+    db::items::update_item_data(&mut tables, update_item_data_events);
+
     // Orders
     log::info!("In db out orders {:?}", orders);
     db::orders::transform_orders_database_changes(

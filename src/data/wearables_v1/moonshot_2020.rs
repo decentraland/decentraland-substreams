@@ -155,6 +155,14 @@ pub fn moonshot_2020() -> Vec<Wearable> {
             body_shapes: vec![String::from("BaseMale"), String::from("BaseFemale")],
         },
         Wearable {
+            id: String::from("ms_pixelchain_upper_body"),
+            name: String::from("Pixelchain Soccer T-Shirt"),
+            description: String::from("Pixelchain Soccer T-Shirt - Moonshot Tournament 2020"),
+            category: String::from("upper_body"),
+            rarity: String::from("legendary"),
+            body_shapes: vec![String::from("BaseMale"), String::from("BaseFemale")],
+        },
+        Wearable {
             id: String::from("ms_pm_upper_body"),
             name: String::from("Polygonal Mind Soccer T-Shirt"),
             description: String::from("Polygonal Mind Soccer T-Shirt - Moonshot Tournament 2020"),

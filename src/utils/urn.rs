@@ -1,6 +1,6 @@
 const BASE_DECENTRALAND_URN: &str = "urn:decentraland:";
 
-pub fn get_urn_for_collection_v2(collection_address: &str, network: String) -> String {
+pub fn get_urn_for_collection_v2(collection_address: &str, network: &str) -> String {
     format!(
         "{}{}:collections-v2:{}",
         BASE_DECENTRALAND_URN, network, collection_address

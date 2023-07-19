@@ -1,6 +1,6 @@
 use substreams::log;
 
-use crate::pb::dcl::{Item, Metadata};
+use crate::pb::dcl::Metadata;
 
 use super::metadata::{build_emote_item, build_wearable_item};
 
@@ -33,8 +33,8 @@ pub fn get_item_type_from_metadata(raw_metadata: String) -> ItemMetadata {
     }
 }
 
-pub fn build_metadata(item: &Item) -> Metadata {
-    let id = item.id.clone();
+pub fn build_metadata(item_id: &str, raw_metadata: &str, collection: &str) -> Metadata {
+    let id = item_id.to_string();
     let mut metadata = Metadata {
         id,
         item_type: "".to_string(),
@@ -42,12 +42,12 @@ pub fn build_metadata(item: &Item) -> Metadata {
         emote: None,
     };
 
-    let data: Vec<&str> = item.raw_metadata.split(':').collect();
+    let data: Vec<&str> = raw_metadata.split(':').collect();
     if data.len() >= 2 {
         let item_type = data[1];
 
         if item_type == WEARABLE_TYPE_SHORT {
-            let wearable = build_wearable_item(item);
+            let wearable = build_wearable_item(item_id, raw_metadata, collection);
             if let Some(wearable) = wearable {
                 metadata.item_type = WEARABLE_V2.to_string();
                 metadata.wearable = Some(wearable);
@@ -55,7 +55,7 @@ pub fn build_metadata(item: &Item) -> Metadata {
                 metadata.item_type = "".to_string();
             }
         } else if item_type == SMART_WEARABLE_TYPE_SHORT {
-            let wearable = build_wearable_item(item);
+            let wearable = build_wearable_item(item_id, raw_metadata, collection);
             if let Some(wearable) = wearable {
                 metadata.item_type = SMART_WEARABLE_V1.to_string();
                 metadata.wearable = Some(wearable);
@@ -63,7 +63,7 @@ pub fn build_metadata(item: &Item) -> Metadata {
                 metadata.item_type = "".to_string();
             }
         } else if item_type == EMOTE_TYPE_SHORT {
-            let emote = build_emote_item(item);
+            let emote = build_emote_item(item_id, raw_metadata, collection);
             if let Some(emote) = emote {
                 metadata.item_type = EMOTE_V1.to_string();
                 metadata.emote = Some(emote);

@@ -42,6 +42,15 @@ modules:
       - store: store_collections
     output:
       type: proto:dcl.CollectionSetApprovedEvents
+  
+  - name: map_item_update_data_event
+    kind: map
+    initialBlock: 15202000
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections
+    output:
+      type: proto:dcl.ItemUpdateDataEvents
 
   - name: map_collection_set_global_minter_event
     kind: map
@@ -82,6 +91,7 @@ modules:
     kind: map
     initialBlock: 15202000
     inputs:
+      - params: string
       - source: sf.ethereum.type.v2.Block
       - map: map_collection_created # depends on the map and not store because the AddItem happens in the same block as the ProxyCreated event, so the store won't have the address yet
     output:
@@ -125,6 +135,7 @@ modules:
       - map: map_collection_set_approved_event
       - map: map_collection_set_global_minter_event
       - map: map_collection_set_item_minter_event
+      - map: map_item_update_data_event
       - map: map_order_created
       - map: map_order_executed
       - map: map_order_cancelled
@@ -133,6 +144,7 @@ modules:
       type: proto:sf.substreams.sink.database.v1.DatabaseChanges
 
 params:
+  map_add_items: "polygon"
   map_collection_created: "polygon"
   map_order_created: "polygon"
   map_order_executed: "polygon"

@@ -1,5 +1,5 @@
 use crate::pb::dcl;
-use crate::utils::sanitize_sql_string;
+use crate::utils::{self, sanitize_sql_string};
 use crate::{dcl_hex, utils::format_postgres_array};
 use substreams::prelude::BigInt;
 use substreams::store::{StoreGet, StoreGetInt64};
@@ -63,38 +63,7 @@ fn get_item_changes(changes: &mut Tables, item: dcl::Item, blockchain_id: Option
         .set("block_number", item.block_number);
 
     // metadata wearable change
-    if let Some(wearable) = metadata.wearable {
-        changes
-            .create_row("metadata", metadata.id.clone())
-            .set("item_type", metadata.item_type.clone())
-            .set("wearable", wearable.id.clone());
-
-        changes
-            .create_row("wearable", wearable.id)
-            .set("name", wearable.name)
-            .set("description", wearable.description)
-            .set("collection", wearable.collection)
-            .set("category", wearable.category)
-            .set("rarity", wearable.rarity)
-            .set("body_shapes", format_postgres_array(wearable.body_shapes));
-    }
-    // metadata emote change
-    if let Some(emote) = metadata.emote {
-        changes
-            .create_row("metadata", metadata.id)
-            .set("item_type", metadata.item_type)
-            .set("emote", emote.id.clone());
-
-        changes
-            .create_row("emote", emote.id)
-            .set("name", emote.name)
-            .set("description", emote.description)
-            .set("collection", emote.collection)
-            .set("category", emote.category)
-            .set("rarity", emote.rarity)
-            .set("loop", emote.r#loop)
-            .set("body_shapes", format_postgres_array(emote.body_shapes));
-    };
+    update_metadata(changes, metadata, item.created_at, item.block_number);
 }
 
 pub fn transform_item_v1_database_changes(
@@ -139,4 +108,80 @@ pub fn update_item_minter(changes: &mut Tables, events: dcl::SetItemMinterEvents
             .set("timestamp", event.timestamp)
             .set("block_number", event.block_number);
     }
+}
+
+pub fn update_item_data(changes: &mut Tables, events: dcl::ItemUpdateDataEvents) {
+    for event in events.events {
+        let item = format!("0x{}-{}", event.collection, event.item);
+        changes
+            .create_row(
+                "update_item_data_events",
+                format!("{}-{}", item, event.timestamp),
+            )
+            .set("collection_id", event.collection.clone())
+            .set("item_id", item)
+            .set("raw_metadata", event.raw_metadata.clone())
+            .set("beneficiary", dcl_hex!(event.beneficiary))
+            .set(
+                "price",
+                BigInt::from(event.price.unwrap_or(dcl::BigInt {
+                    value: String::from("0"),
+                })),
+            )
+            .set("timestamp", event.timestamp)
+            .set("block_number", event.block_number);
+
+        let metadata =
+            utils::items::build_metadata(&event.item, &event.raw_metadata, &event.collection);
+        update_metadata(changes, metadata, event.timestamp, event.block_number);
+    }
+}
+
+fn update_metadata(
+    changes: &mut Tables,
+    metadata: dcl::Metadata,
+    timestamp: u64,
+    block_number: u64,
+) {
+    let metadata_id = format!("{}-{}", metadata.id, timestamp);
+    if let Some(wearable) = metadata.wearable {
+        let wearable_id = format!("{}-{}", wearable.id, timestamp);
+        changes
+            .create_row("metadata", metadata_id.clone())
+            .set("item_id", metadata.id.clone())
+            .set("item_type", metadata.item_type.clone())
+            .set("wearable", wearable_id.clone())
+            .set("timestamp", timestamp)
+            .set("block_number", block_number);
+
+        changes
+            .create_row("wearable", wearable_id)
+            .set("metadata", metadata_id.clone())
+            .set("name", wearable.name)
+            .set("description", wearable.description)
+            .set("collection", wearable.collection)
+            .set("category", wearable.category)
+            .set("body_shapes", format_postgres_array(wearable.body_shapes));
+    }
+    // metadata emote change
+    if let Some(emote) = metadata.emote {
+        let emote_id = format!("{}-{}", emote.id, timestamp);
+        changes
+            .create_row("metadata", metadata_id.clone())
+            .set("item_id", metadata.id)
+            .set("item_type", metadata.item_type)
+            .set("emote", emote_id.clone())
+            .set("timestamp", timestamp)
+            .set("block_number", block_number);
+
+        changes
+            .create_row("emote", emote_id)
+            .set("metadata", metadata_id)
+            .set("name", emote.name)
+            .set("description", emote.description)
+            .set("collection", emote.collection)
+            .set("category", emote.category)
+            .set("loop", emote.r#loop)
+            .set("body_shapes", format_postgres_array(emote.body_shapes));
+    };
 }

@@ -936,6 +936,7 @@ pub mod functions {
             }
         }
         pub fn call(&self, address: Vec<u8>) -> Option<Vec<u8>> {
+            substreams::log::info!("here1");
             use substreams_ethereum::pb::eth::rpc;
             let rpc_calls = rpc::RpcCalls {
                 calls: vec![rpc::RpcCall {
@@ -943,6 +944,7 @@ pub mod functions {
                     data: self.encode(),
                 }],
             };
+            substreams::log::info!("Call About to call");
             let responses = substreams_ethereum::rpc::eth_call(&rpc_calls).responses;
             let response = responses.get(0).expect("one response should have existed");
             if response.failed {

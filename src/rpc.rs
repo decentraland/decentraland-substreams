@@ -104,28 +104,3 @@ pub fn get_token_uri(collection_address: Vec<u8>, token_id: BigInt) -> Option<St
     let func = abi::erc721::functions::TokenUri { token_id };
     func.call(collection_address)
 }
-
-// pub fn get_collection_v1_item_count(collection_address: Vec<u8>) -> Option<BigInt> {
-//     let func = abi::erc721::functions::ItemsCount {};
-//     func.call(collection_address)
-// }
-
-// type CollectionItemTuple = (
-//     std::string::String,
-//     substreams::scalar::BigInt,
-//     substreams::scalar::BigInt,
-//     substreams::scalar::BigInt,
-//     Vec<u8>,
-//     std::string::String,
-//     std::string::String,
-// );
-
-// pub fn get_collection_item(
-//     collection_address: Vec<u8>,
-//     item_id: u64,
-// ) -> Option<CollectionItemTuple> {
-//     let items = abi::collections_v2::functions::Items {
-//         param0: BigInt::from(item_id),
-//     };
-//     items.call(collection_address)
-// }

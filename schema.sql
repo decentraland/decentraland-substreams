@@ -65,27 +65,30 @@ create TABLE items (
 );
 CREATE TABLE metadata (
     id text NOT NULL PRIMARY KEY,
+    item_id TEXT NOT NULL,
     item_type TEXT NOT NULL,
     wearable text,
-    emote text
+    emote text,
+    timestamp TEXT NOT NULL,
+    block_number TEXT NOT NULL
 );
 CREATE TABLE wearable (
     id text NOT NULL PRIMARY KEY,
+    metadata text NOT NULL,
     name text NOT NULL,
     description text NOT NULL,
     collection text NOT NULL,
     category text NOT NULL,
-    rarity text NOT NULL,
     body_shapes text []
 );
 CREATE TABLE emote (
     id text NOT NULL PRIMARY KEY,
+    metadata text NOT NULL,
     name text NOT NULL,
     description text NOT NULL,
     collection text NOT NULL,
     category text NOT NULL,
     loop boolean NOT NULL,
-    rarity text NOT NULL,
     body_shapes text []
 );
 CREATE TABLE orders (
@@ -137,6 +140,16 @@ CREATE TABLE collection_set_global_minter_events (
     minter TEXT NOT NULL,
     value BOOLEAN NOT NULL,
     search_is_store_minter BOOLEAN NOT NULL,
+    timestamp TEXT NOT NULL,
+    block_number TEXT NOT NULL
+);
+CREATE TABLE update_item_data_events (
+    id TEXT NOT NULL PRIMARY KEY,
+    collection_id TEXT NOT NULL,
+    item_id TEXT NOT NULL,
+    price TEXT NOT NULL,
+    beneficiary TEXT NOT NULL,
+    raw_metadata TEXT NOT NULL,
     timestamp TEXT NOT NULL,
     block_number TEXT NOT NULL
 );

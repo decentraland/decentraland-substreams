@@ -38,6 +38,7 @@ modules:
     kind: map
     initialBlock: 7103733
     inputs:
+      - params: string
       - map: map_add_items_v1
       - store: store_collections_v1
     output:
@@ -106,6 +107,7 @@ modules:
 
 params:
   db_out: "goerli"
+  map_add_collections_v1: "goerli"
   map_add_items_v1: "goerli"
   map_order_created: "goerli"
   map_order_executed: "goerli"

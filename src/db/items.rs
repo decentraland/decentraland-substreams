@@ -118,8 +118,8 @@ pub fn update_item_data(changes: &mut Tables, events: dcl::ItemUpdateDataEvents)
                 "update_item_data_events",
                 format!("{}-{}", item, event.timestamp),
             )
-            .set("collection_id", event.collection.clone())
-            .set("item_id", item)
+            .set("collection_id", dcl_hex!(event.collection.clone()))
+            .set("item_id", item.clone())
             .set("raw_metadata", event.raw_metadata.clone())
             .set("beneficiary", dcl_hex!(event.beneficiary))
             .set(
@@ -131,8 +131,7 @@ pub fn update_item_data(changes: &mut Tables, events: dcl::ItemUpdateDataEvents)
             .set("timestamp", event.timestamp)
             .set("block_number", event.block_number);
 
-        let metadata =
-            utils::items::build_metadata(&event.item, &event.raw_metadata, &event.collection);
+        let metadata = utils::items::build_metadata(&item, &event.raw_metadata, &event.collection);
         update_metadata(changes, metadata, event.timestamp, event.block_number);
     }
 }
@@ -159,7 +158,7 @@ fn update_metadata(
             .set("metadata", metadata_id.clone())
             .set("name", wearable.name)
             .set("description", wearable.description)
-            .set("collection", wearable.collection)
+            .set("collection", dcl_hex!(wearable.collection))
             .set("category", wearable.category)
             .set("body_shapes", format_postgres_array(wearable.body_shapes));
     }

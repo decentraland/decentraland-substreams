@@ -10,6 +10,18 @@ run_process() {
     ($command) > $log_file 2>&1 & echo $! > $pid_file
 }
 
+# Initialize variables for optional flags
+on_module_hash_mismatch=""
+undo_buffer_size=""
+
+# Parse command-line arguments for flags
+for arg in "$@"; do
+  case $arg in
+    --on-module-hash-mismatch=*) on_module_hash_mismatch="${arg#*=}" ;;
+    --undo-buffer-size=*) undo_buffer_size="${arg#*=}" ;;
+  esac
+done
+
 # Prompt the user to enter the network
 read -p "Enter the network: (mainnet, goerli, polygon or mumbai) " network
 read -p "Enter the PostgreSQL connection string: " psql_string
@@ -44,12 +56,24 @@ case $network in
         ;;
 esac
 
-# Check if the flag is provided in the script call
-if [[ "$*" == *"--on-module-hash-mistmatch=warn"* ]]; then
-    run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port --on-module-hash-mistmatch=warn"
-else
-    run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port"
+# Construct the base run command
+run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port"
+
+
+# Add the undo buffer size if provided
+echo $undo_buffer_size
+if [ -n "$undo_buffer_size" ]; then
+    run_command+=" --undo-buffer-size=$undo_buffer_size"
 fi
+
+
+
+# Add the on-module-hash-mismatch flag if provided
+if [ -n "$on_module_hash_mismatch" ]; then
+    run_command+=" --on-module-hash-mismatch=$on_module_hash_mismatch"
+fi
+
+echo $run_command
 
 # Run the process for the specified network
 run_process "$run_command" "$network-sink-pid.txt" "logs-$network.txt" &

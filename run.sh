@@ -70,7 +70,7 @@ fi
 
 # Add the on-module-hash-mismatch flag if provided
 if [ -n "$on_module_hash_mismatch" ]; then
-    run_command+=" --on-module-hash-mismatch=$on_module_hash_mismatch"
+    run_command+=" --on-module-hash-mismatch='$on_module_hash_mismatch'"
 fi
 
 echo $run_command

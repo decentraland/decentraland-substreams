@@ -17,7 +17,7 @@ undo_buffer_size=""
 # Parse command-line arguments for flags
 for arg in "$@"; do
   case $arg in
-    --on-module-hash-mismatch=*) on_module_hash_mismatch="${arg#*=}" ;;
+    --on-module-hash-mistmatch=*) on_module_hash_mismatch="${arg#*=}" ;;
     --undo-buffer-size=*) undo_buffer_size="${arg#*=}" ;;
   esac
 done
@@ -70,7 +70,7 @@ fi
 
 # Add the on-module-hash-mismatch flag if provided
 if [ -n "$on_module_hash_mismatch" ]; then
-    run_command+=" --on-module-hash-mismatch='$on_module_hash_mismatch'"
+    run_command+=" --on-module-hash-mistmatch=$on_module_hash_mismatch"
 fi
 
 echo $run_command

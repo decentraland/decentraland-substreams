@@ -14,7 +14,7 @@ get_os() {
 # Step 1: Determine the operating system and set the appropriate download URL
 OS=$(get_os)
 if [ "$OS" == "linux" ]; then
-    URL="https://github.com/streamingfast/substreams-sink-postgres/releases/download/v2.3.3/substreams-sink-postgres_linux_x86_64.tar.gz"
+    URL="https://github.com/decentraland/substreams-sink-postgres/releases/download/0.0.3/substreams-sink-postgres_linux_amd64.tar.gz"
 elif [ "$OS" == "macos" ]; then
     URL="https://github.com/streamingfast/substreams-sink-postgres/releases/download/v2.3.3/substreams-sink-postgres_darwin_x86_64.tar.gz"
 else

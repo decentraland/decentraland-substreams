@@ -57,7 +57,7 @@ case $network in
 esac
 
 # Construct the base run command
-run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port --rollback-url=http://localhost:5001/v1/reorg-handler rollback-db-schema=$psql_schema"
+run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port --rollback-url=http://localhost:5001/v1/reorg-handler --rollback-db-schema=$psql_schema"
 
 
 # Add the undo buffer size if provided

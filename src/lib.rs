@@ -84,7 +84,7 @@ pub fn map_add_items_v1(
                     reviewed_at: blk.timestamp_seconds(),
                     metadata: Some(dcl::Metadata {
                         item_type: utils::items::WEARABLE_V1.to_string(),
-                        id: representation.id.clone(),
+                        id: format!("{}-{}", collection_address, representation.id),
                         wearable: Some(dcl::Wearable {
                             id: representation.id,
                             name: representation.name,
@@ -99,6 +99,35 @@ pub fn map_add_items_v1(
                     content_hash: None,    // not used for v1
                     first_listed_at: None, // not used for v1
                     sold_at: None,         // not used for v1
+                    block_number: blk.number,
+                }
+            })
+            .collect(),
+    })
+}
+
+#[substreams::handlers::map]
+pub fn map_transfers_v1(
+    network: String,
+    blk: eth::Block,
+) -> Result<dcl::TransferEvents, substreams::errors::Error> {
+    let contracts = if network == "goerli" {
+        collections_v1::COLLECTIONS_GOERLI_HEX
+    } else {
+        collections_v1::COLLECTIONS_MAINNET
+    };
+    Ok(dcl::TransferEvents {
+        events: blk
+            .events::<abi::erc721::events::Transfer3>(contracts)
+            .map(|(transfer_event, log)| {
+                substreams::log::info!("Transfer event: {:?}", transfer_event);
+                let timestamp = blk.timestamp_seconds();
+                dcl::TransferEvent {
+                    contract: Hex(log.address()).to_string(),
+                    from: Hex(transfer_event.from).to_string(),
+                    to: Hex(transfer_event.to).to_string(),
+                    token_id: transfer_event.token_id.into(),
+                    timestamp,
                     block_number: blk.number,
                 }
             })
@@ -505,7 +534,7 @@ pub fn store_nfts_item(nfts: dcl::NfTs, store: StoreSetString) {
     }
 }
 
-/// Reads item creationg by the `AddItem` event
+/// Reads item created by the `AddItem` event
 #[substreams::handlers::map]
 pub fn map_add_items(
     network: String,
@@ -585,6 +614,41 @@ pub fn map_add_items(
                     &collection_address,
                 ));
                 item
+            })
+            .collect(),
+    })
+}
+
+#[substreams::handlers::map]
+pub fn map_transfers_v2(
+    blk: eth::Block,
+    collections: dcl::Collections,
+) -> Result<dcl::TransferEvents, substreams::errors::Error> {
+    let mut addresses = vec![];
+    for collection in collections.collections {
+        match hex::decode(&collection.address) {
+            Ok(decoded) => addresses.push(decoded),
+            Err(_err) => log::debug!("Err decoding the collection address {}", collection.address),
+        }
+    }
+    let mut addresses_ref = vec![];
+    for address in &addresses {
+        addresses_ref.push(address.as_slice());
+    }
+    Ok(dcl::TransferEvents {
+        events: blk
+            .events::<abi::collections_v2::events::Transfer>(&addresses_ref)
+            .map(|(transfer_event, log)| {
+                substreams::log::info!("Transfer event: {:?}", transfer_event);
+                let timestamp = blk.timestamp_seconds();
+                dcl::TransferEvent {
+                    contract: Hex(log.address()).to_string(),
+                    from: Hex(transfer_event.from).to_string(),
+                    to: Hex(transfer_event.to).to_string(),
+                    token_id: transfer_event.token_id.into(),
+                    timestamp,
+                    block_number: blk.number,
+                }
             })
             .collect(),
     })
@@ -731,6 +795,7 @@ fn db_out(
     network: String,
     collections: dcl::Collections,
     items: dcl::Items,
+    transfers: dcl::TransferEvents,
     nfts: dcl::NfTs,
     orders: dcl::Orders,
     orders_executed: dcl::Orders,
@@ -757,6 +822,9 @@ fn db_out(
         orders_executed,
         orders_cancelled,
     );
+    // Transfers
+    log::info!("In db out transfers {:?}", transfers);
+    db::transfers::update_transfers(&mut tables, transfers);
 
     Ok(tables.to_database_changes())
 }
@@ -766,6 +834,7 @@ fn db_out_polygon(
     collections: dcl::Collections,
     items: dcl::Items,
     nfts: dcl::NfTs,
+    transfers: dcl::TransferEvents,
     set_approved_events: dcl::CollectionSetApprovedEvents,
     set_store_minter_events: dcl::CollectionSetGlobalMinterEvents,
     set_item_minter_event: dcl::SetItemMinterEvents,
@@ -785,6 +854,9 @@ fn db_out_polygon(
     // NFTs
     log::info!("In db out nfts {:?}", nfts);
     db::nfts::transform_nfts_database_changes(&mut tables, nfts);
+    // TransferEvents
+    log::info!("In db out transfers {:?}", transfers);
+    db::transfers::update_transfers(&mut tables, transfers);
     // SetApprovedEvents
     log::info!("In db out set_events_approved {:?}", set_approved_events);
     db::collections::insert_collection_is_approved_event(&mut tables, set_approved_events);

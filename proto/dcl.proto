@@ -98,6 +98,19 @@ message ItemUpdateDataEvents {
     repeated ItemUpdateDataEvent events = 1;
 }
 
+message TransferEvent {
+  string from = 1;
+  string to = 2;
+  string token_id = 3;
+  string contract = 4;
+  uint64 timestamp = 5;
+  uint64 block_number = 6;
+}
+
+message TransferEvents {
+    repeated TransferEvent events = 1;
+}
+
 message SetItemMinterEvent {
   string item = 1;
   string collection = 2;

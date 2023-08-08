@@ -26,6 +26,15 @@ modules:
     output:
       type: proto:dcl.Items
 
+  - name: map_transfers_v1
+    kind: map
+    initialBlock: 8828687
+    inputs:
+      - params: string
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:dcl.TransferEvents
+
   - name: store_collections_v1
     kind: store
     updatePolicy: add
@@ -96,6 +105,7 @@ modules:
       - params: string
       - map: map_add_collections_v1
       - map: map_add_items_v1
+      - map: map_transfers_v1
       - map: map_issues_v1
       - map: map_order_created
       - map: map_order_executed
@@ -108,6 +118,7 @@ modules:
 params:
   db_out: "mainnet"
   map_add_collections_v1: "mainnet"
+  map_transfers_v1: "mainnet"
   map_add_items_v1: "mainnet"
   map_order_created: "mainnet"
   map_order_executed: "mainnet"

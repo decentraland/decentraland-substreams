@@ -71,9 +71,13 @@ pub fn transform_item_v1_database_changes(
     items: dcl::Items,
     collections_v1_store: StoreGetInt64,
 ) {
-    for item in items.items {
-        let blockchain_id = collections_v1_store.get_last(item.collection.clone());
-        get_item_changes(changes, item, blockchain_id);
+    for (i, item) in items.items.iter().enumerate() {
+        let key_last = collections_v1_store.get_last(item.collection.clone());
+        // Unwrap key_last or assign 0 if None
+        let key_last_value = key_last.unwrap_or(0);
+        // Calculate blockchain_id as described
+        let blockchain_id = key_last_value - (items.items.len() as i64) + i as i64 + 1;
+        get_item_changes(changes, item.clone(), Some(blockchain_id));
     }
 }
 
@@ -90,7 +94,7 @@ pub fn transform_item_database_changes(
     items: dcl::Items,
     collections_v1_store: StoreGetInt64,
 ) {
-    if network == "polygon" {
+    if network == "polygon" || network == "mumbai" {
         transform_item_v2_database_changes(changes, items);
     } else {
         transform_item_v1_database_changes(changes, items, collections_v1_store);
@@ -118,8 +122,8 @@ pub fn update_item_data(changes: &mut Tables, events: dcl::ItemUpdateDataEvents)
                 "update_item_data_events",
                 format!("{}-{}", item, event.timestamp),
             )
-            .set("collection_id", dcl_hex!(event.collection.clone()))
-            .set("item_id", item.clone())
+            .set("collection_id", event.collection.clone())
+            .set("item_id", item)
             .set("raw_metadata", event.raw_metadata.clone())
             .set("beneficiary", dcl_hex!(event.beneficiary))
             .set(
@@ -131,7 +135,8 @@ pub fn update_item_data(changes: &mut Tables, events: dcl::ItemUpdateDataEvents)
             .set("timestamp", event.timestamp)
             .set("block_number", event.block_number);
 
-        let metadata = utils::items::build_metadata(&item, &event.raw_metadata, &event.collection);
+        let metadata =
+            utils::items::build_metadata(&event.item, &event.raw_metadata, &event.collection);
         update_metadata(changes, metadata, event.timestamp, event.block_number);
     }
 }
@@ -158,7 +163,7 @@ fn update_metadata(
             .set("metadata", metadata_id.clone())
             .set("name", wearable.name)
             .set("description", wearable.description)
-            .set("collection", dcl_hex!(wearable.collection))
+            .set("collection", wearable.collection)
             .set("category", wearable.category)
             .set("body_shapes", format_postgres_array(wearable.body_shapes));
     }

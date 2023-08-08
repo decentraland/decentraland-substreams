@@ -45,8 +45,8 @@ function incrementSchema(schema: string) {
 export async function createNewSchema(client: PoolClient, network: string) {
   const latestSchema = await getLatestSchema(client);
   const newSchema = incrementSchema(latestSchema || INITIAL_SCHEMA);
-  console.log("latestSchema: ", latestSchema);
-  console.log("newSchema: ", newSchema);
+  console.log("Latest schema in the db: ", latestSchema);
+  console.log("New schema created: ", newSchema);
   try {
     await client.query(SQL`CREATE SCHEMA IF NOT EXISTS `.append(newSchema));
     await client.query(
@@ -65,12 +65,13 @@ export async function createNewSchema(client: PoolClient, network: string) {
       );
       
       -- Indices -------------------------------------------------------
-      
+
       CREATE UNIQUE INDEX cursor_pk ON `
           .append(newSchema)
           .append(SQL`.cursors(id text_ops)`)
       );
     await client.query(createCursorQuery);
+    return newSchema;
   } catch (error) {
     console.error(error);
     throw Error("Error creating new schema");
@@ -78,13 +79,26 @@ export async function createNewSchema(client: PoolClient, network: string) {
   return newSchema;
 }
 
+const grantAccess = async (client: PoolClient, newSchema: string) => {
+  await client.query(
+    SQL`GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA `
+      .append(newSchema)
+      .append(` TO dappssubstreamsuser;`)
+  );
+  await client.query(
+    SQL`GRANT USAGE ON SCHEMA `
+      .append(newSchema)
+      .append(` TO dappssubstreamsuser;`)
+  );
+};
+
 // Function to run the sink command
 function runSinkSetupCommand(
   db: string,
   callback: (error: Error | null, stdout: string, stderr: string) => void
 ) {
   exec(
-    `substreams-sink-postgres setup '${db}' ../schema.sql`,
+    `../substreams-sink-postgres setup '${db}' ../schema.sql`,
     (error, stdout, stderr) => {
       callback(error, stdout, stderr);
     }
@@ -124,22 +138,24 @@ async function main() {
 
   //   const latestSchema = await getLatestSchema(client);
 
-  await createNewSchema(client, network);
+  const newSchema = await createNewSchema(client, network);
 
   runSinkSetupCommand(
     dbConnectionString,
-    (error: Error | null, stdout: string, stderr: string) => {
+    async (error: Error | null, stdout: string, stderr: string) => {
       if (error) {
         console.error("Error running sink command:", error);
       }
 
+      await grantAccess(client, newSchema);
+
+      client.release();
+      // Close the database connection pool
+      await pool.end();
+
       console.log("Sink command executed successfully:", stdout);
     }
   );
-
-  client.release();
-  // Close the database connection pool
-  await pool.end();
 }
 
 main().catch((error) => {

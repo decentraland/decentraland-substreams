@@ -572,7 +572,11 @@ pub fn map_add_items(
                     content_hash,
                 } = item;
                 sanitize_sql_string(metadata.clone());
-                let item_urn = utils::urn::get_urn_for_collection_v2(&collection_address, &network);
+                let item_urn = utils::urn::get_urn_for_collection_v2(
+                    &collection_address,
+                    &add_item_event.item_id.to_string(),
+                    &network,
+                );
                 let item_id = utils::get_item_id(
                     Hex(log.address()).to_string(),
                     add_item_event.item_id.to_string(),

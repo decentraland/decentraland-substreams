@@ -69,7 +69,7 @@ pub fn build_emote_item(item_id: &str, raw_metadata: &str, collection: &str) -> 
             category: if is_valid_emote_category(data[4]) {
                 data[4].to_string()
             } else {
-                "DANCE".to_string() // Fallback to "DANCE" for old emotes
+                "dance".to_string() // Fallback to "dance" for old emotes
             },
             body_shapes: data[5]
                 .split(',')
@@ -86,8 +86,8 @@ pub fn build_emote_item(item_id: &str, raw_metadata: &str, collection: &str) -> 
 
 fn is_valid_emote_category(category: &str) -> bool {
     match category {
-        "DANCE" | "STUNT" | "GREETINGS" | "FUN" | "POSES" | "REACTIONS" | "HORROR"
-        | "MISCELLANEOUS" => true,
+        "dance" | "stunt" | "greetings" | "fun" | "poses" | "reactions" | "horror"
+        | "miscellaneous" => true,
         _ => {
             substreams::log::info!("Invalid Category {}", category);
             false

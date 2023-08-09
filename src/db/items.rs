@@ -135,8 +135,7 @@ pub fn update_item_data(changes: &mut Tables, events: dcl::ItemUpdateDataEvents)
             .set("timestamp", event.timestamp)
             .set("block_number", event.block_number);
 
-        let metadata =
-            utils::items::build_metadata(&event.item, &event.raw_metadata, &event.collection);
+        let metadata = utils::items::build_metadata(&item, &event.raw_metadata, &event.collection);
         update_metadata(changes, metadata, event.timestamp, event.block_number);
     }
 }

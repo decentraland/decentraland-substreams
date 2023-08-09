@@ -86,7 +86,7 @@ fn get_catalyst_base() -> String {
         return "https://peer.decentraland.org".to_string();
     }
 
-    if network == "ropsten" || network == "goerli" || network == "mumbai" {
+    if network == "ropsten" || network == "goerli" || network == "mumbai" || network == "sepolia" {
         return "https://peer.decentraland.zone".to_string();
     }
 

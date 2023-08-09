@@ -1,9 +1,14 @@
 const BASE_DECENTRALAND_URN: &str = "urn:decentraland:";
 
-pub fn get_urn_for_collection_v2(collection_address: &str, network: &str) -> String {
+pub fn get_urn_for_collection_v2(collection_address: &str, item_id: &str, network: &str) -> String {
+    let formatted_network = if network == "polygon" {
+        "matic"
+    } else {
+        network
+    };
     format!(
-        "{}{}:collections-v2:{}",
-        BASE_DECENTRALAND_URN, network, collection_address
+        "{}{}:collections-v2:{}:{}",
+        BASE_DECENTRALAND_URN, network, collection_address, item_id
     )
 }
 

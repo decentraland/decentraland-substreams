@@ -123,7 +123,7 @@ pub fn update_item_data(changes: &mut Tables, events: dcl::ItemUpdateDataEvents)
                 format!("{}-{}", item, event.timestamp),
             )
             .set("collection_id", event.collection.clone())
-            .set("item_id", item)
+            .set("item_id", item.clone())
             .set("raw_metadata", event.raw_metadata.clone())
             .set("beneficiary", dcl_hex!(event.beneficiary))
             .set(

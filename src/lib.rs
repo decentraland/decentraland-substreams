@@ -167,7 +167,7 @@ pub fn map_add_collections_v1(
                 is_editable: collection_data.6,
                 minters: [].to_vec(),  //@TODO update this logic
                 managers: [].to_vec(), //@TODO update this logic
-                urn: utils::urn::get_urn_for_collection_v2(&collection_address, &network),
+                urn: utils::urn::get_collection_urn_for_collection_v2(&collection_address, &network),
                 created_at: item.created_at,
                 updated_at: item.updated_at,
                 reviewed_at: item.reviewed_at,
@@ -302,7 +302,7 @@ pub fn map_collection_created(
                     is_editable: collection_data.6,
                     minters: [].to_vec(),
                     managers: [].to_vec(),
-                    urn: utils::urn::get_urn_for_collection_v2(
+                    urn: utils::urn::get_collection_urn_for_collection_v2(
                         &Hex(event.address).to_string(),
                         &network,
                     ),

@@ -1,14 +1,26 @@
 const BASE_DECENTRALAND_URN: &str = "urn:decentraland:";
 
-pub fn get_urn_for_collection_v2(collection_address: &str, item_id: &str, network: &str) -> String {
-    let formatted_network = if network == "polygon" {
+fn format_network(network: &str) -> &str {
+    if network == "polygon" {
         "matic"
     } else {
         network
-    };
+    }
+}
+
+pub fn get_urn_for_collection_v2(collection_address: &str, item_id: &str, network: &str) -> String {
+    let formatted_network = format_network(network);
     format!(
         "{}{}:collections-v2:{}:{}",
-        BASE_DECENTRALAND_URN, network, collection_address, item_id
+        BASE_DECENTRALAND_URN, formatted_network, collection_address, item_id
+    )
+}
+
+pub fn get_collection_urn_for_collection_v2(collection_address: &str, network: &str) -> String {
+    let formatted_network = format_network(network);
+    format!(
+        "{}{}:collections-v2:{}",
+        BASE_DECENTRALAND_URN, formatted_network, collection_address
     )
 }
 

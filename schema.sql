@@ -43,8 +43,8 @@ create TABLE items (
     blockchain_id BigInt NOT NULL,
     creator text NOT NULL,
     item_type TEXT NOT NULL,
-    total_supply numeric NOT NULL, -- update
-    max_supply numeric TEXT NOT NULL, -- update
+    total_supply numeric NOT NULL,
+    max_supply numeric NOT NULL,
     rarity TEXT NOT NULL,
     creation_fee numeric NOT NULL,
     available TEXT NOT NULL,

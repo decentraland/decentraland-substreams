@@ -277,6 +277,10 @@ pub struct Emote {
     pub rarity: ::prost::alloc::string::String,
     #[prost(string, repeated, tag="8")]
     pub body_shapes: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(bool, tag="9")]
+    pub has_sound: bool,
+    #[prost(bool, tag="10")]
+    pub has_geometry: bool
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]

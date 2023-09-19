@@ -112,7 +112,9 @@ CREATE TABLE emote (
     collection text NOT NULL,
     category text NOT NULL,
     loop boolean NOT NULL,
-    body_shapes text []
+    body_shapes text [],
+    has_sound boolean,
+    has_geometry: boolean
 );
 CREATE TABLE orders (
     id TEXT NOT NULL PRIMARY KEY,

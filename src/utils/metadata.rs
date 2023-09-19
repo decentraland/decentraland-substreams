@@ -75,7 +75,9 @@ pub fn build_emote_item(item_id: &str, raw_metadata: &str, collection: &str) -> 
                 .split(',')
                 .map(|s| s.to_string())
                 .collect::<Vec<String>>(),
-            r#loop: data.len() == 7 && is_valid_loop_value(data[6]) && data[6] == "1",
+            r#loop: data.len() >= 7 && is_valid_loop_value(data[6]) && data[6] == "1",
+            has_sound: data.len() >= 8 && data[7].contains("s"),
+            has_geometry: data.len() >= 8 && data[7].contains("g")
         };
 
         return Some(emote);

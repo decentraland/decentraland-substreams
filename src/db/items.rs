@@ -185,6 +185,8 @@ fn update_metadata(
             .set("collection", emote.collection)
             .set("category", emote.category)
             .set("loop", emote.r#loop)
-            .set("body_shapes", format_postgres_array(emote.body_shapes));
+            .set("body_shapes", format_postgres_array(emote.body_shapes))
+            .set("has_sound", emote.has_sound)
+            .set("has_geometry", emote.has_geometry);
     };
 }

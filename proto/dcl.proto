@@ -98,6 +98,18 @@ message ItemUpdateDataEvents {
     repeated ItemUpdateDataEvent events = 1;
 }
 
+message RescueItemEvent {
+  string collection = 1;
+  string item = 2;
+  string raw_metadata = 3;
+  uint64 timestamp = 4;
+  uint64 block_number = 5;
+}
+
+message RescueItemEvents {
+  repeated RescueItemEvent events = 1;
+}
+
 message TransferEvent {
   string from = 1;
   string to = 2;

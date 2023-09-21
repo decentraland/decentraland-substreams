@@ -167,7 +167,10 @@ pub fn map_add_collections_v1(
                 is_editable: collection_data.6,
                 minters: [].to_vec(),  //@TODO update this logic
                 managers: [].to_vec(), //@TODO update this logic
-                urn: utils::urn::get_collection_urn_for_collection_v2(&collection_address, &network),
+                urn: utils::urn::get_collection_urn_for_collection_v2(
+                    &collection_address,
+                    &network,
+                ),
                 created_at: item.created_at,
                 updated_at: item.updated_at,
                 reviewed_at: item.reviewed_at,
@@ -360,6 +363,43 @@ pub fn map_collection_set_approved_event(
         }
     }
     Ok(dcl::CollectionSetApprovedEvents { events })
+}
+
+// Reads the RescueItem Event for collections v2
+#[substreams::handlers::map]
+pub fn map_item_rescue_event(
+    blk: eth::Block,
+    collections_store: substreams::store::StoreGetString,
+) -> Result<dcl::RescueItemEvents, substreams::errors::Error> {
+    let mut events: Vec<dcl::RescueItemEvent> = vec![];
+    for trx in blk.transactions() {
+        for call in trx.calls.iter() {
+            let _call_index = call.index;
+            if call.state_reverted {
+                continue;
+            }
+
+            for log in call.logs.iter() {
+                let collection_address = &Hex(log.clone().address).to_string();
+                if let Some(_collection) = collections_store.get_last(collection_address) {
+                    if let Some(event) =
+                        abi::collections_v2::events::RescueItem::match_and_decode(log)
+                    {
+                        substreams::log::info!("UpdateItemData Event found! {:?}", event);
+                        let timestamp = blk.timestamp_seconds();
+                        events.push(dcl::RescueItemEvent {
+                            collection: collection_address.to_string(),
+                            item: event.item_id.to_string(),
+                            raw_metadata: event.metadata,
+                            block_number: blk.number,
+                            timestamp,
+                        });
+                    }
+                }
+            }
+        }
+    }
+    Ok(dcl::RescueItemEvents { events })
 }
 
 // Reads the SetGlobalMinter Event for collections v2
@@ -843,6 +883,7 @@ fn db_out_polygon(
     set_store_minter_events: dcl::CollectionSetGlobalMinterEvents,
     set_item_minter_event: dcl::SetItemMinterEvents,
     update_item_data_events: dcl::ItemUpdateDataEvents,
+    rescue_item_events: dcl::RescueItemEvents,
     orders: dcl::Orders,
     orders_executed: dcl::Orders,
     orders_cancelled: dcl::Orders,
@@ -879,6 +920,11 @@ fn db_out_polygon(
         update_item_data_events
     );
     db::items::update_item_data(&mut tables, update_item_data_events);
+    log::info!(
+        "In db out update_item_rescue_events {:?}",
+        rescue_item_events
+    );
+    db::items::update_item_data_on_rescue(&mut tables, rescue_item_events);
 
     // Orders
     log::info!("In db out orders {:?}", orders);

@@ -250,11 +250,8 @@ CREATE UNIQUE INDEX idx_nfts_owners_view ON nfts_owners_view (item);
 CREATE OR REPLACE FUNCTION refresh_nfts_owners_view()
 RETURNS TRIGGER LANGUAGE plpgsql AS
 $$
-DECLARE 
-  schema_name TEXT;
 BEGIN
-  schema_name := get_latest_dcl_schema_name();
-  EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || schema_name || '.nfts_owners_view';
+  EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || TG_TABLE_SCHEMA || '.nfts_owners_view';
   RETURN NULL;
 END;
 $$;

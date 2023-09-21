@@ -51,6 +51,15 @@ modules:
       - store: store_collections
     output:
       type: proto:dcl.ItemUpdateDataEvents
+  
+  - name: map_item_rescue_event
+    kind: map
+    initialBlock: 15202000
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections
+    output:
+      type: proto:dcl.RescueItemEvents
 
   - name: map_collection_set_global_minter_event
     kind: map
@@ -146,6 +155,7 @@ modules:
       - map: map_collection_set_global_minter_event
       - map: map_collection_set_item_minter_event
       - map: map_item_update_data_event
+      - map: map_item_rescue_event
       - map: map_order_created
       - map: map_order_executed
       - map: map_order_cancelled

@@ -140,6 +140,14 @@ pub fn update_item_data(changes: &mut Tables, events: dcl::ItemUpdateDataEvents)
     }
 }
 
+pub fn update_item_data_on_rescue(changes: &mut Tables, events: dcl::RescueItemEvents) {
+    for event in events.events {
+        let item = format!("0x{}-{}", event.collection, event.item);
+        let metadata = utils::items::build_metadata(&item, &event.raw_metadata, &event.collection);
+        update_metadata(changes, metadata, event.timestamp, event.block_number);
+    }
+}
+
 fn update_metadata(
     changes: &mut Tables,
     metadata: dcl::Metadata,

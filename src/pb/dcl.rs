@@ -171,6 +171,26 @@ pub struct ItemUpdateDataEvents {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RescueItemEvent {
+    #[prost(string, tag="1")]
+    pub collection: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub item: ::prost::alloc::string::String,
+    #[prost(string, tag="3")]
+    pub raw_metadata: ::prost::alloc::string::String,
+    #[prost(uint64, tag="4")]
+    pub timestamp: u64,
+    #[prost(uint64, tag="5")]
+    pub block_number: u64,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RescueItemEvents {
+    #[prost(message, repeated, tag="1")]
+    pub events: ::prost::alloc::vec::Vec<RescueItemEvent>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TransferEvent {
     #[prost(string, tag="1")]
     pub from: ::prost::alloc::string::String,

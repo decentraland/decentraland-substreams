@@ -149,7 +149,7 @@ CREATE TABLE update_item_data_events (
     id TEXT NOT NULL PRIMARY KEY,
     collection_id TEXT NOT NULL,
     item_id TEXT NOT NULL,
-    price TEXT NOT NULL,
+    price numeric NOT NULL,
     beneficiary TEXT NOT NULL,
     raw_metadata TEXT NOT NULL,
     timestamp numeric NOT NULL,
@@ -169,13 +169,20 @@ CREATE TABLE transfers (
 
 --@TODO ADD INDEXES HERE
 
+CREATE INDEX orders_nft_status_id_created_at_idx ON orders (nft, status, id, created_at DESC);
+
 --- VIEWS, FUNCTIONS & TRIGGERS
 
 --- collection_minters_view
 CREATE MATERIALIZED VIEW collection_minters_view AS
 SELECT collection_id,
        search_is_store_minter AS is_store_minter,
-       timestamp
+       timestamp,
+       (
+                SELECT MIN(timestamp) 
+                FROM collection_set_global_minter_events 
+                WHERE collection_id = subquery.collection_id AND search_is_store_minter = true
+            ) AS first_listed_at
 FROM (
     SELECT collection_id,
            value,
@@ -316,20 +323,17 @@ CREATE OR REPLACE FUNCTION update_old_orders()
 RETURNS TRIGGER AS $$
 DECLARE
   recent_order_id TEXT;
+  schema_name TEXT;
 BEGIN
-  SELECT id INTO recent_order_id
-  FROM orders
-  WHERE nft = NEW.nft
-  AND status = 'open'
-  AND id <> NEW.id
-  ORDER BY created_at DESC
-  LIMIT 1;
+  schema_name := get_latest_dcl_schema_name();
+
+  EXECUTE format('SELECT id FROM %I.orders WHERE nft = $1 AND status = ''open'' AND id <> $2 ORDER BY created_at DESC LIMIT 1', schema_name)
+  INTO recent_order_id
+  USING NEW.nft, NEW.id;
 
   IF recent_order_id IS NOT NULL THEN
-    UPDATE orders
-    SET status = 'cancelled',
-        updated_at = NEW.created_at
-    WHERE id = recent_order_id;
+    EXECUTE format('UPDATE %I.orders SET status = ''cancelled'', updated_at = $1 WHERE id = $2', schema_name)
+    USING NEW.created_at, recent_order_id;
   END IF;
 
   RETURN NEW;
@@ -345,10 +349,12 @@ FOR EACH ROW EXECUTE FUNCTION update_old_orders();
 CREATE OR REPLACE FUNCTION cancel_orders_on_transfer()
 RETURNS TRIGGER LANGUAGE plpgsql AS
 $$
+DECLARE 
+  schema_name TEXT;
 BEGIN
-  UPDATE orders
-  SET status = 'cancelled', updated_at = NEW.timestamp::integer
-  WHERE nft = NEW.nft AND owner = NEW."from" AND status = 'open';
+  schema_name := get_latest_dcl_schema_name();
+  EXECUTE format('UPDATE %I.orders SET status = ''cancelled'', updated_at = $1 WHERE nft = $2 AND owner = $3 AND status = ''open''', schema_name)
+  USING NEW.timestamp::integer, NEW.nft, NEW."from";
 
   RETURN NEW;
 END;
@@ -357,7 +363,6 @@ $$;
 CREATE TRIGGER cancel_orders_on_transfer_trigger
 AFTER INSERT ON transfers
 FOR EACH ROW EXECUTE FUNCTION cancel_orders_on_transfer();
-
 
 ------ item_set_minter_event_view
 

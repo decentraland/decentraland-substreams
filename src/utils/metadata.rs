@@ -34,7 +34,7 @@ fn is_valid_wearable_category(category: &str) -> bool {
     match category {
         "eyebrows" | "eyes" | "facial_hair" | "hair" | "mouth" | "upper_body" | "lower_body"
         | "feet" | "earring" | "eyewear" | "hat" | "helmet" | "mask" | "tiara" | "top_head"
-        | "skin" => true,
+        | "hands_wear" | "skin" => true,
         _ => {
             substreams::log::info!("Invalid Category {}", category);
             false

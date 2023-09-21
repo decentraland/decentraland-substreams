@@ -46,3 +46,11 @@ substreams-sink-postgres run \
     db_out
 ```    
 
+
+### Compile protos
+
+If there are changes in the proto definitions, to update run:
+
+```
+./substreams protogen ./substreams.yaml --show-generated-buf-gen --exclude-paths="sf/substreams,google"
+```

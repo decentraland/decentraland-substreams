@@ -237,6 +237,36 @@ CREATE TRIGGER nfts_view_refresh
 AFTER INSERT OR UPDATE OR DELETE ON nfts
 FOR EACH STATEMENT EXECUTE FUNCTION refresh_nfts_view();
 
+
+----- nfts_with_owners
+
+CREATE MATERIALIZED VIEW nfts_owners_view AS
+SELECT item, COUNT(DISTINCT owner) AS owners_count
+FROM nfts
+GROUP BY item;
+
+CREATE UNIQUE INDEX idx_nfts_owners_view ON nfts_owners_view (item);
+
+CREATE OR REPLACE FUNCTION refresh_nfts_owners_view()
+RETURNS TRIGGER LANGUAGE plpgsql AS
+$$
+DECLARE 
+  schema_name TEXT;
+BEGIN
+  schema_name := get_latest_dcl_schema_name();
+  EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || schema_name || '.nfts_owners_view';
+  RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER nfts_owners_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON nfts
+FOR EACH STATEMENT EXECUTE FUNCTION refresh_nfts_owners_view();
+
+CREATE TRIGGER transfers_nfts_owners_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON transfers
+FOR EACH STATEMENT EXECUTE FUNCTION refresh_nfts_owners_view();
+
 ---- latest prices view
 
 CREATE MATERIALIZED VIEW latest_prices_view AS

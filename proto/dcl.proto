@@ -201,6 +201,8 @@ message Emote {
   string category = 5;
   bool loop = 6;
   repeated string body_shapes = 7;
+  bool has_sound = 8;
+  bool has_geometry = 9;
 }
 
 enum WearableCategory {

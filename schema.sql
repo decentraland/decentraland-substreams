@@ -93,7 +93,7 @@ CREATE TABLE emote (
     loop boolean NOT NULL,
     body_shapes text [],
     has_sound boolean,
-    has_geometry: boolean
+    has_geometry boolean
 );
 CREATE TABLE orders (
     id TEXT NOT NULL PRIMARY KEY,
@@ -352,16 +352,14 @@ CREATE OR REPLACE FUNCTION update_old_orders()
 RETURNS TRIGGER AS $$
 DECLARE
   recent_order_id TEXT;
-  schema_name TEXT;
 BEGIN
-  schema_name := get_latest_dcl_schema_name();
 
-  EXECUTE format('SELECT id FROM %I.orders WHERE nft = $1 AND status = ''open'' AND id <> $2 ORDER BY created_at DESC LIMIT 1', schema_name)
+  EXECUTE format('SELECT id FROM %I.orders WHERE nft = $1 AND status = ''open'' AND id <> $2 ORDER BY created_at DESC LIMIT 1', TG_TABLE_SCHEMA)
   INTO recent_order_id
   USING NEW.nft, NEW.id;
 
   IF recent_order_id IS NOT NULL THEN
-    EXECUTE format('UPDATE %I.orders SET status = ''cancelled'', updated_at = $1 WHERE id = $2', schema_name)
+    EXECUTE format('UPDATE %I.orders SET status = ''cancelled'', updated_at = $1 WHERE id = $2', TG_TABLE_SCHEMA)
     USING NEW.created_at, recent_order_id;
   END IF;
 
@@ -378,11 +376,8 @@ FOR EACH ROW EXECUTE FUNCTION update_old_orders();
 CREATE OR REPLACE FUNCTION cancel_orders_on_transfer()
 RETURNS TRIGGER LANGUAGE plpgsql AS
 $$
-DECLARE 
-  schema_name TEXT;
 BEGIN
-  schema_name := get_latest_dcl_schema_name();
-  EXECUTE format('UPDATE %I.orders SET status = ''cancelled'', updated_at = $1 WHERE nft = $2 AND owner = $3 AND status = ''open''', schema_name)
+  EXECUTE format('UPDATE %I.orders SET status = ''cancelled'', updated_at = $1 WHERE nft = $2 AND owner = $3 AND status = ''open''', TG_TABLE_SCHEMA)
   USING NEW.timestamp::integer, NEW.nft, NEW."from";
 
   RETURN NEW;

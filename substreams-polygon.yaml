@@ -111,7 +111,7 @@ modules:
     initialBlock: 15202000
     inputs:
       - source: sf.ethereum.type.v2.Block
-      - map: map_collection_created # depends on the map and not store because the AddItem happens in the same block as the ProxyCreated event, so the store won't have the address yet
+      - store: store_collections
     output:
       type: proto:dcl.TransferEvents
 

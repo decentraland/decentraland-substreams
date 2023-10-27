@@ -9,8 +9,9 @@ mod utils;
 
 use constants::{
     COLLECTIONS_FACTORY, COLLECTIONS_FACTORY_MUMBAI, COLLECTIONS_V3_FACTORY,
-    COLLECTIONS_V3_FACTORY_MUMBAI, MARKETPLACEV2_CONTRACT, MARKETPLACEV2_CONTRACT_MUMBAI,
-    MARKETPLACE_MAINNET_CONTRACT, MARKETPLACE_SEPOLIA_CONTRACT,
+    COLLECTIONS_V3_FACTORY_MUMBAI, MARKETPLACEV1_CONTRACT, MARKETPLACEV1_CONTRACT_MUMBAI,
+    MARKETPLACEV2_CONTRACT, MARKETPLACEV2_CONTRACT_MUMBAI, MARKETPLACE_MAINNET_CONTRACT,
+    MARKETPLACE_SEPOLIA_CONTRACT,
 };
 use data::constants::collections_v1;
 use pb::dcl;
@@ -701,15 +702,16 @@ pub fn map_transfers_v2(
 }
 
 // ORDERS
-fn get_marketplace_contract(network: String) -> [u8; 20] {
-    if network == "sepolia" {
-        MARKETPLACE_SEPOLIA_CONTRACT
-    } else if network == "mainnet" {
-        MARKETPLACE_MAINNET_CONTRACT
-    } else if network == "mumbai" {
-        MARKETPLACEV2_CONTRACT_MUMBAI
-    } else {
-        MARKETPLACEV2_CONTRACT
+fn get_marketplace_contract(network: &str) -> Vec<&[u8]> {
+    match network {
+        "sepolia" => vec![&MARKETPLACE_SEPOLIA_CONTRACT],
+        "mainnet" => vec![&MARKETPLACE_MAINNET_CONTRACT],
+        "mumbai" => vec![
+            &MARKETPLACEV1_CONTRACT_MUMBAI,
+            &MARKETPLACEV2_CONTRACT_MUMBAI,
+        ],
+        "polygon" => vec![&MARKETPLACEV1_CONTRACT, &MARKETPLACEV2_CONTRACT],
+        _ => vec![&MARKETPLACE_SEPOLIA_CONTRACT],
     }
 }
 
@@ -720,8 +722,8 @@ pub fn map_order_created(
     blk: eth::Block,
 ) -> Result<dcl::Orders, substreams::errors::Error> {
     let mut order_map: HashMap<String, dcl::Order> = HashMap::new();
-    let contract = get_marketplace_contract(network);
-    blk.events::<abi::marketplace::events::OrderCreated>(&[&contract])
+    let contract = get_marketplace_contract(&network);
+    blk.events::<abi::marketplace::events::OrderCreated>(contract.as_slice())
         .for_each(|(event, log)| {
             substreams::log::info!("Order created {:?}", event);
             let id: String = Hex(event.id).to_string();
@@ -770,9 +772,9 @@ pub fn map_order_executed(
 ) -> Result<dcl::Orders, substreams::errors::Error> {
     Ok(dcl::Orders {
         orders: blk
-            .events::<abi::marketplacev2::events::OrderSuccessful>(&[&get_marketplace_contract(
-                network,
-            )])
+            .events::<abi::marketplacev2::events::OrderSuccessful>(
+                get_marketplace_contract(&network).as_slice(),
+            )
             .map(|(event, log)| {
                 substreams::log::info!("Order executed {:?}", event);
                 dcl::Order {
@@ -807,9 +809,9 @@ pub fn map_order_cancelled(
 ) -> Result<dcl::Orders, substreams::errors::Error> {
     Ok(dcl::Orders {
         orders: blk
-            .events::<abi::marketplacev2::events::OrderCancelled>(&[&get_marketplace_contract(
-                network,
-            )])
+            .events::<abi::marketplacev2::events::OrderCancelled>(
+                get_marketplace_contract(&network).as_slice(),
+            )
             .map(|(event, log)| {
                 substreams::log::info!("Order cancelled {:?}", event);
                 dcl::Order {

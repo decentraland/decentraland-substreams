@@ -173,3 +173,19 @@ CREATE TABLE transfers (
 
 CREATE INDEX orders_nft_status_id_created_at_idx ON orders (nft, status, id, created_at DESC);
 
+---- cancel orders on transfer
+
+CREATE OR REPLACE FUNCTION cancel_orders_on_transfer()
+RETURNS TRIGGER LANGUAGE plpgsql AS
+$$
+BEGIN
+  EXECUTE format('UPDATE %I.orders SET status = ''cancelled'', updated_at = $1 WHERE nft = $2 AND owner = $3 AND status = ''open''', TG_TABLE_SCHEMA)
+  USING NEW.timestamp::integer, NEW.nft, NEW."from";
+
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER cancel_orders_on_transfer_trigger
+AFTER INSERT ON transfers
+FOR EACH ROW EXECUTE FUNCTION cancel_orders_on_transfer();

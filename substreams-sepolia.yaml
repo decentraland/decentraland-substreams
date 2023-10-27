@@ -19,7 +19,7 @@ binaries:
 modules:
   - name: map_add_items_v1
     kind: map
-    initialBlock: 4567435
+    initialBlock: 3831225
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -28,7 +28,7 @@ modules:
 
   - name: map_transfers_v1
     kind: map
-    initialBlock: 4567435
+    initialBlock: 3831225
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -39,13 +39,13 @@ modules:
     kind: store
     updatePolicy: add
     valueType: int64
-    initialBlock: 4567435
+    initialBlock: 3831225
     inputs:
       - map: map_add_items_v1
 
   - name: map_add_collections_v1
     kind: map
-    initialBlock: 4567435
+    initialBlock: 3831225
     inputs:
       - params: string
       - map: map_add_items_v1
@@ -55,7 +55,7 @@ modules:
 
   - name: map_issues_v1
     kind: map
-    initialBlock: 4567435
+    initialBlock: 3831225
     inputs:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections_v1
@@ -64,7 +64,7 @@ modules:
 
   - name: store_nfts_item
     kind: store
-    initialBlock: 4567435
+    initialBlock: 3831225
     updatePolicy: set
     valueType: string
     inputs:
@@ -73,7 +73,7 @@ modules:
   # Orders
   - name: map_order_created
     kind: map
-    initialBlock: 4567435
+    initialBlock: 3831225
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -82,7 +82,7 @@ modules:
 
   - name: map_order_executed
     kind: map
-    initialBlock: 4567435
+    initialBlock: 3831225
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -91,7 +91,7 @@ modules:
 
   - name: map_order_cancelled
     kind: map
-    initialBlock: 4567435
+    initialBlock: 3831225
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -99,7 +99,7 @@ modules:
       type: proto:dcl.Orders
 
   - name: db_out
-    initialBlock: 4567435
+    initialBlock: 3831225
     kind: map
     inputs:
       - params: string

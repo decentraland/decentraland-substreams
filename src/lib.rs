@@ -10,7 +10,7 @@ mod utils;
 use constants::{
     COLLECTIONS_FACTORY, COLLECTIONS_FACTORY_MUMBAI, COLLECTIONS_V3_FACTORY,
     COLLECTIONS_V3_FACTORY_MUMBAI, MARKETPLACEV2_CONTRACT, MARKETPLACEV2_CONTRACT_MUMBAI,
-    MARKETPLACE_GOERLI_CONTRACT, MARKETPLACE_MAINNET_CONTRACT,
+    MARKETPLACE_MAINNET_CONTRACT, MARKETPLACE_SEPOLIA_CONTRACT,
 };
 use data::constants::collections_v1;
 use pb::dcl;
@@ -33,8 +33,8 @@ pub fn map_add_items_v1(
     network: String,
     blk: eth::Block,
 ) -> Result<dcl::Items, substreams::errors::Error> {
-    let contracts = if network == "goerli" {
-        collections_v1::COLLECTIONS_GOERLI_HEX
+    let contracts = if network == "sepolia" {
+        collections_v1::COLLECTIONS_SEPOLIA
     } else {
         collections_v1::COLLECTIONS_MAINNET
     };
@@ -111,8 +111,8 @@ pub fn map_transfers_v1(
     network: String,
     blk: eth::Block,
 ) -> Result<dcl::TransferEvents, substreams::errors::Error> {
-    let contracts = if network == "goerli" {
-        collections_v1::COLLECTIONS_GOERLI_HEX
+    let contracts = if network == "sepolia" {
+        collections_v1::COLLECTIONS_SEPOLIA
     } else {
         collections_v1::COLLECTIONS_MAINNET
     };
@@ -666,42 +666,44 @@ pub fn map_add_items(
 #[substreams::handlers::map]
 pub fn map_transfers_v2(
     blk: eth::Block,
-    collections: dcl::Collections,
+    collections_store: substreams::store::StoreGetString,
 ) -> Result<dcl::TransferEvents, substreams::errors::Error> {
-    let mut addresses = vec![];
-    for collection in collections.collections {
-        match hex::decode(&collection.address) {
-            Ok(decoded) => addresses.push(decoded),
-            Err(_err) => log::debug!("Err decoding the collection address {}", collection.address),
+    let mut events = vec![];
+    for trx in blk.transactions() {
+        for call in trx.calls.iter() {
+            let _call_index = call.index;
+            if call.state_reverted {
+                continue;
+            }
+
+            for log in call.logs.iter() {
+                let collection_address = &Hex(log.clone().address).to_string();
+                if let Some(_collection) = collections_store.get_last(collection_address) {
+                    if let Some(transfer_event) =
+                        abi::collections_v2::events::Transfer::match_and_decode(log)
+                    {
+                        substreams::log::info!("Transfer event: {:?}", transfer_event);
+                        let timestamp = blk.timestamp_seconds();
+                        events.push(dcl::TransferEvent {
+                            contract: Hex(log.clone().address).to_string(),
+                            from: Hex(transfer_event.from).to_string(),
+                            to: Hex(transfer_event.to).to_string(),
+                            token_id: transfer_event.token_id.into(),
+                            timestamp,
+                            block_number: blk.number,
+                        })
+                    }
+                }
+            }
         }
     }
-    let mut addresses_ref = vec![];
-    for address in &addresses {
-        addresses_ref.push(address.as_slice());
-    }
-    Ok(dcl::TransferEvents {
-        events: blk
-            .events::<abi::collections_v2::events::Transfer>(&addresses_ref)
-            .map(|(transfer_event, log)| {
-                substreams::log::info!("Transfer event: {:?}", transfer_event);
-                let timestamp = blk.timestamp_seconds();
-                dcl::TransferEvent {
-                    contract: Hex(log.address()).to_string(),
-                    from: Hex(transfer_event.from).to_string(),
-                    to: Hex(transfer_event.to).to_string(),
-                    token_id: transfer_event.token_id.into(),
-                    timestamp,
-                    block_number: blk.number,
-                }
-            })
-            .collect(),
-    })
+    Ok(dcl::TransferEvents { events })
 }
 
 // ORDERS
 fn get_marketplace_contract(network: String) -> [u8; 20] {
-    if network == "goerli" {
-        MARKETPLACE_GOERLI_CONTRACT
+    if network == "sepolia" {
+        MARKETPLACE_SEPOLIA_CONTRACT
     } else if network == "mainnet" {
         MARKETPLACE_MAINNET_CONTRACT
     } else if network == "mumbai" {

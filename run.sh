@@ -23,7 +23,7 @@ for arg in "$@"; do
 done
 
 # Prompt the user to enter the network
-read -p "Enter the network: (mainnet, goerli, polygon or mumbai) " network
+read -p "Enter the network: (mainnet, sepolia, polygon or mumbai) " network
 read -p "Enter the PostgreSQL connection string: " psql_string
 read -p "Enter the PostgreSQL schema to sink to: " psql_schema
 read -p "Enter the spkg URL or yaml: " spkg_string
@@ -40,9 +40,9 @@ case $network in
         network_url="mainnet.eth.streamingfast.io:443"
         db_out="db_out"
         ;;
-    "goerli")
+    "sepolia")
         prometheus_port="9104"
-        network_url="goerli.eth.streamingfast.io:443"
+        network_url="sepolia.eth.streamingfast.io:443"
         db_out="db_out"
         ;;
     "mumbai")

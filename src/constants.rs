@@ -5,8 +5,8 @@ pub const ZERO_ADDRESS: &str = "0x0000000000000000000000000000000000000000";
 // Contracts
 // Ethereum Mainnet
 pub const MARKETPLACE_MAINNET_CONTRACT: [u8; 20] = hex!("8e5660b4ab70168b5a6feea0e0315cb49c8cd539");
-// Ethereum Goerli
-pub const MARKETPLACE_GOERLI_CONTRACT: [u8; 20] = hex!("5d01fbD3E22892be40F69bdAE7Ad921C8cdA2085");
+// Ethereum Sepolia
+pub const MARKETPLACE_SEPOLIA_CONTRACT: [u8; 20] = hex!("ccf0c17da6cd68041b1bf0f7e015767242077d8c");
 // Polygon Mainnet
 pub const MARKETPLACEV2_CONTRACT: [u8; 20] = hex!("480a0f4e360E8964e68858Dd231c2922f1df45Ef");
 pub const COLLECTIONS_FACTORY: [u8; 20] = hex!("B549B2442b2BD0a53795BC5cDcBFE0cAF7ACA9f8");

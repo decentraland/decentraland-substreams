@@ -1,0 +1,125 @@
+specVersion: v0.1.0
+package:
+  name: "decentraland_substreams"
+  version: v0.0.3
+
+protobuf:
+  files:
+    - database.proto
+    - dcl.proto
+
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_add_items_v1
+    kind: map
+    initialBlock: 4567435
+    inputs:
+      - params: string
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:dcl.Items
+
+  - name: map_transfers_v1
+    kind: map
+    initialBlock: 4567435
+    inputs:
+      - params: string
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:dcl.TransferEvents
+
+  - name: store_collections_v1
+    kind: store
+    updatePolicy: add
+    valueType: int64
+    initialBlock: 4567435
+    inputs:
+      - map: map_add_items_v1
+
+  - name: map_add_collections_v1
+    kind: map
+    initialBlock: 4567435
+    inputs:
+      - params: string
+      - map: map_add_items_v1
+      - store: store_collections_v1
+    output:
+      type: proto:dcl.Collections
+
+  - name: map_issues_v1
+    kind: map
+    initialBlock: 4567435
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections_v1
+    output:
+      type: proto:dcl.NFTs
+
+  - name: store_nfts_item
+    kind: store
+    initialBlock: 4567435
+    updatePolicy: set
+    valueType: string
+    inputs:
+      - map: map_issues_v1
+
+  # Orders
+  - name: map_order_created
+    kind: map
+    initialBlock: 4567435
+    inputs:
+      - params: string
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:dcl.Orders
+
+  - name: map_order_executed
+    kind: map
+    initialBlock: 4567435
+    inputs:
+      - params: string
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:dcl.Orders
+
+  - name: map_order_cancelled
+    kind: map
+    initialBlock: 4567435
+    inputs:
+      - params: string
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:dcl.Orders
+
+  - name: db_out
+    initialBlock: 4567435
+    kind: map
+    inputs:
+      - params: string
+      - map: map_add_collections_v1
+      - map: map_add_items_v1
+      - map: map_transfers_v1
+      - map: map_issues_v1
+      - map: map_order_created
+      - map: map_order_executed
+      - map: map_order_cancelled
+      - store: store_nfts_item
+      - store: store_collections_v1
+    output:
+      type: proto:sf.substreams.sink.database.v1.DatabaseChanges
+
+params:
+  db_out: "sepolia"
+  map_add_collections_v1: "sepolia"
+  map_transfers_v1: "sepolia"
+  map_add_items_v1: "sepolia"
+  map_order_created: "sepolia"
+  map_order_executed: "sepolia"
+  map_order_cancelled: "sepolia"

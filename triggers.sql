@@ -42,14 +42,7 @@ $$;
 CREATE TRIGGER collection_minters_view_refresh
 AFTER INSERT OR UPDATE OR DELETE ON collection_set_global_minter_events
 FOR EACH STATEMENT
-EXECUTE PROCEDURE refresh_collection_minters_view();
-
--- Create the trigger to refresh the materialized view when there are changes to the underlying table
-CREATE TRIGGER collection_set_approved_events_view_refresh
-AFTER INSERT OR UPDATE OR DELETE
-ON collection_set_approved_events
-FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_collection_set_approved_events_view();
+EXECUTE PROCEDURE refresh_collection_minters_view();s
 
 ----- nfts_view
 
@@ -279,8 +272,8 @@ WITH NumberedEvents AS (
         ) AS row_num
     FROM
         collection_set_approved_events
-    WHERE
-        value = true
+    -- WHERE
+    --     value = true
 )
 SELECT 
     collection_id,
@@ -303,3 +296,9 @@ BEGIN
 END;
 $$;
 
+-- Create the trigger to refresh the materialized view when there are changes to the underlying table
+CREATE TRIGGER collection_set_approved_events_view_refresh
+AFTER INSERT OR UPDATE OR DELETE
+ON collection_set_approved_events
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_collection_set_approved_events_view();

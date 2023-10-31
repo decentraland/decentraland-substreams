@@ -22,11 +22,18 @@ for arg in "$@"; do
   esac
 done
 
+# Read the PostgreSQL connection string from the environment variable
+psql_string=$SUBSTREAMS_DATABASE
+
 # Prompt the user to enter the network
 read -p "Enter the network: (mainnet, sepolia, polygon or mumbai) " network
-read -p "Enter the PostgreSQL connection string: " psql_string
 read -p "Enter the PostgreSQL schema to sink to: " psql_schema
-read -p "Enter the spkg URL or yaml: " spkg_string
+
+# Read the version number from the user
+read -p "Enter the version number: " version_number
+
+# Construct the spkg_string
+spkg_string="decentraland-substreams-$network-$version_number.spkg"
 
 # Set the prometheus_port and db_out based on the network
 case $network in
@@ -57,8 +64,7 @@ case $network in
 esac
 
 # Construct the base run command
-run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url $spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port --rollback-url=http://localhost:5001/v1/reorg-handler --rollback-db-schema=$psql_schema"
-
+run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema $network_url https://github.com/decentraland/decentraland-substreams/releases/download/$version_number/$spkg_string $db_out --metrics-listen-addr=0.0.0.0:$prometheus_port --rollback-url=http://localhost:5001/v1/reorg-handler --rollback-db-schema=$psql_schema"
 
 # Add the undo buffer size if provided
 echo $undo_buffer_size

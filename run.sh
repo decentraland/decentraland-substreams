@@ -33,7 +33,7 @@ read -p "Enter the PostgreSQL schema to sink to: " psql_schema
 read -p "Enter the version number: " version_number
 
 # Construct the spkg_string
-spkg_string="decentraland-substreams-$network-$version_number.spkg"
+spkg_string="decentraland-substreams-$network.spkg"
 
 # Set the prometheus_port and db_out based on the network
 case $network in

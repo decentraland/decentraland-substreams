@@ -1,6 +1,7 @@
-SET search_path TO dcl24;
+-- IMPORTANT: SET THE RIGHT SCHEMA HERE BEFORE RUNNING
+SET search_path TO dcl32;
 
---- VIEWS, FUNCTIONS & TRIGGERS
+--- VIEWS
 
 --- collection_minters_view
 CREATE MATERIALIZED VIEW collection_minters_view AS
@@ -30,20 +31,6 @@ WHERE subquery.row_num = 1;
 CREATE UNIQUE INDEX idx_collection_minters_view_collection_id
 ON collection_minters_view (collection_id);
 
-CREATE OR REPLACE FUNCTION refresh_collection_minters_view()
-RETURNS TRIGGER LANGUAGE plpgsql AS
-$$
-BEGIN
-  EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || TG_TABLE_SCHEMA || '.collection_minters_view';
-  RETURN NULL;
-END;
-$$;
-
-CREATE TRIGGER collection_minters_view_refresh
-AFTER INSERT OR UPDATE OR DELETE ON collection_set_global_minter_events
-FOR EACH STATEMENT
-EXECUTE PROCEDURE refresh_collection_minters_view();s
-
 ----- nfts_view
 
 CREATE MATERIALIZED VIEW nfts_view AS
@@ -53,18 +40,6 @@ GROUP BY item;
 
 CREATE UNIQUE INDEX idx_nfts_view ON nfts_view (item);
 
-CREATE OR REPLACE FUNCTION refresh_nfts_view()
-RETURNS TRIGGER LANGUAGE plpgsql AS
-$$
-BEGIN
-  EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || TG_TABLE_SCHEMA || '.nfts_view';
-  RETURN NULL;
-END;
-$$;
-
-CREATE TRIGGER nfts_view_refresh
-AFTER INSERT OR UPDATE OR DELETE ON nfts
-FOR EACH STATEMENT EXECUTE FUNCTION refresh_nfts_view();
 
 ----- nfts_with_owners
 
@@ -74,23 +49,6 @@ FROM nfts
 GROUP BY item;
 
 CREATE UNIQUE INDEX idx_nfts_owners_view ON nfts_owners_view (item);
-
-CREATE OR REPLACE FUNCTION refresh_nfts_owners_view()
-RETURNS TRIGGER LANGUAGE plpgsql AS
-$$
-BEGIN
-  EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || TG_TABLE_SCHEMA || '.nfts_owners_view';
-  RETURN NULL;
-END;
-$$;
-
-CREATE TRIGGER nfts_owners_view_refresh
-AFTER INSERT OR UPDATE OR DELETE ON nfts
-FOR EACH STATEMENT EXECUTE FUNCTION refresh_nfts_owners_view();
-
-CREATE TRIGGER transfers_nfts_owners_view_refresh
-AFTER INSERT OR UPDATE OR DELETE ON transfers
-FOR EACH STATEMENT EXECUTE FUNCTION refresh_nfts_owners_view();
 
 ---- latest prices view
 
@@ -113,20 +71,6 @@ WHERE subquery.row_num = 1;
 CREATE UNIQUE INDEX idx_latest_prices_view_item_id
 ON latest_prices_view (item_id);
 
-CREATE OR REPLACE FUNCTION refresh_latest_prices_view()
-RETURNS TRIGGER LANGUAGE plpgsql AS
-$$
-BEGIN
-  EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || TG_TABLE_SCHEMA || '.latest_prices_view';
-  RETURN NULL;
-END;
-$$;
-
-CREATE TRIGGER latest_prices_view_refresh
-AFTER INSERT OR UPDATE OR DELETE
-ON update_item_data_events
-FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_latest_prices_view();
 
 --- orders
 
@@ -157,20 +101,6 @@ GROUP BY nfts_with_orders.item;
 CREATE UNIQUE INDEX idx_nfts_with_orders_view
 ON nfts_with_orders_view (item);
 
-CREATE OR REPLACE FUNCTION refresh_nfts_with_orders_view()
-RETURNS TRIGGER LANGUAGE plpgsql AS
-$$
-BEGIN
-  EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || TG_TABLE_SCHEMA || '.nfts_with_orders_view';
-  RETURN NULL;
-END;
-$$;
-
-CREATE TRIGGER nfts_with_orders_view_refresh
-AFTER INSERT OR UPDATE OR DELETE
-ON orders
-FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_nfts_with_orders_view();
 
 --- update older orders on insert
 
@@ -243,20 +173,6 @@ WHERE
 CREATE UNIQUE INDEX idx_item_set_minter_event_view_item_id
 ON item_set_minter_event_view (item_id);
 
-CREATE OR REPLACE FUNCTION refresh_item_set_minter_event_view()
-RETURNS TRIGGER LANGUAGE plpgsql AS
-$$
-BEGIN
-  EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || TG_TABLE_SCHEMA || '.item_set_minter_event_view';
-  RETURN NULL;
-END;
-$$;
-
-CREATE TRIGGER item_set_minter_event_view_refresh
-AFTER INSERT OR UPDATE OR DELETE
-ON item_minters
-FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_item_set_minter_event_view();
 
 ----- collection_set_approved_events_view
 
@@ -284,21 +200,68 @@ FROM
 WHERE
     row_num = 1;
 
-CREATE UNIQUE INDEX idx_collection_set_approved_events_view_collection_id
-ON collection_set_approved_events_view (collection_id);
+----- item_sold_at_view
 
-CREATE OR REPLACE FUNCTION refresh_collection_set_approved_events_view()
+CREATE MATERIALIZED VIEW item_sold_at_view AS
+SELECT item, MAX(updated_at) from orders WHERE status = 'sold'
+GROUP BY orders.item;
+
+CREATE UNIQUE INDEX idx_item_sold_at_view_item
+ON item_sold_at_view (item);
+
+-- FUNCTIONS && TRIGGERS
+
+-- Function for refreshing materialized views
+CREATE OR REPLACE FUNCTION refresh_mat_view()
 RETURNS TRIGGER LANGUAGE plpgsql AS
 $$
 BEGIN
-  EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || TG_TABLE_SCHEMA || '.collection_set_approved_events_view';
-  RETURN NULL;
+	PERFORM pg_notify('refresh_mat_view', TG_TABLE_SCHEMA || '.' || TG_ARGV[0]);
+	RETURN NULL;
 END;
 $$;
 
--- Create the trigger to refresh the materialized view when there are changes to the underlying table
-CREATE TRIGGER collection_set_approved_events_view_refresh
-AFTER INSERT OR UPDATE OR DELETE
-ON collection_set_approved_events
+CREATE TRIGGER collection_minters_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON collection_set_global_minter_events
 FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_collection_set_approved_events_view();
+EXECUTE FUNCTION refresh_mat_view('collection_minters_view');
+
+CREATE TRIGGER nfts_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON nfts
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mat_view('nfts_view');
+
+CREATE TRIGGER nfts_owners_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON nfts
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mat_view('nfts_owners_view');
+
+CREATE TRIGGER transfers_nfts_owners_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON transfers
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mat_view('nfts_owners_view');
+
+CREATE TRIGGER latest_prices_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON update_item_data_events
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mat_view('latest_prices_view');
+
+CREATE TRIGGER nfts_with_orders_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON orders
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mat_view('nfts_with_orders_view');
+
+CREATE TRIGGER item_set_minter_event_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON item_minters
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mat_view('item_set_minter_event_view');
+
+CREATE TRIGGER item_sold_at_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON orders
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mat_view('item_sold_at_view');
+
+CREATE TRIGGER collection_set_approved_events_view_refresh
+AFTER INSERT OR UPDATE OR DELETE ON collection_set_approved_events
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mat_view('collection_set_approved_events_view');

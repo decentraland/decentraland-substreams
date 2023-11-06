@@ -172,6 +172,8 @@ CREATE TABLE transfers (
 --@TODO ADD INDEXES HERE
 
 CREATE INDEX orders_nft_status_id_created_at_idx ON orders (nft, status, id, created_at DESC);
+CREATE INDEX item_idx ON nfts (item);
+CREATE INDEX owner_idx ON nfts (owner);
 
 ---- cancel orders on transfer
 

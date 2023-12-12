@@ -24,7 +24,6 @@ if (!config) {
   client.on("notification", (msg) => {
     if (msg.channel === "refresh_mat_view") {
       const materializedView = msg.payload;
-      console.log('materializedView: ', materializedView);
 
       client
         .query(`REFRESH MATERIALIZED VIEW CONCURRENTLY ${materializedView}`)

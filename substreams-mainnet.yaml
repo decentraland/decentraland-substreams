@@ -127,11 +127,10 @@ params:
 network: mainnet
 
 imports:
-  dcl: https://github.com/decentraland/decentraland-substreams/releases/download/1.4.0/decentraland-substreams-mainnet.spkg
   sql: https://github.com/streamingfast/substreams-sink-sql/releases/download/protodefs-v1.0.3/substreams-sink-sql-protodefs-v1.0.3.spkg
 
 sink:
-  module: dcl:db_out
+  module: db_out
   type: sf.substreams.sink.sql.v1.Service
   config:
     schema: "./schema.sql"

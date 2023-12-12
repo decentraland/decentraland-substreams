@@ -173,11 +173,10 @@ params:
 network: polygon
 
 imports:
-  dcl: https://github.com/decentraland/decentraland-substreams/releases/download/1.4.0/decentraland-substreams-polygon.spkg
   sql: https://github.com/streamingfast/substreams-sink-sql/releases/download/protodefs-v1.0.3/substreams-sink-sql-protodefs-v1.0.3.spkg
 
 sink:
-  module: dcl:db_out_polygon
+  module: db_out_polygon
   type: sf.substreams.sink.sql.v1.Service
   config:
     schema: "./schema.sql"

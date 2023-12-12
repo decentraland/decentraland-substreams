@@ -28,9 +28,11 @@ psql_string=$SUBSTREAMS_DATABASE
 # Prompt the user to enter the network
 read -p "Enter the network: (mainnet, sepolia, polygon or mumbai) " network
 read -p "Enter the PostgreSQL schema to sink to: " psql_schema
+# Read the version number from the user
+read -p "Enter the version number: " version_number
 
 # Construct the yaml
-yaml="./substreams-$network.yaml"
+spkg_string="decentraland-substreams-$network.spkg"
 
 # Set the prometheus_port and db_out based on the network
 case $network in
@@ -53,7 +55,7 @@ case $network in
 esac
 
 # Construct the base run command
-run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema $yaml --metrics-listen-addr=0.0.0.0:$prometheus_port"
+run_command="./substreams-sink-postgres run $psql_string&schema=$psql_schema https://github.com/decentraland/decentraland-substreams/releases/download/$version_number/$spkg_string --metrics-listen-addr=0.0.0.0:$prometheus_port"
 
 # Add the undo buffer size if provided
 echo $undo_buffer_size

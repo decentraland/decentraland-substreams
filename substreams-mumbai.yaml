@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: "decentraland_substreams"
-  version: v0.0.3
+  version: v1.0.4
 
 protobuf:
   files:

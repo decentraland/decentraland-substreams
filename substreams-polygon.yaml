@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: "decentraland_substreams"
-  version: v0.0.3
+  version: v1.4.0
 
 protobuf:
   files:
@@ -42,7 +42,7 @@ modules:
       - store: store_collections
     output:
       type: proto:dcl.CollectionSetApprovedEvents
-  
+
   - name: map_item_update_data_event
     kind: map
     initialBlock: 15202000
@@ -51,7 +51,7 @@ modules:
       - store: store_collections
     output:
       type: proto:dcl.ItemUpdateDataEvents
-  
+
   - name: map_item_rescue_event
     kind: map
     initialBlock: 15202000
@@ -169,3 +169,15 @@ params:
   map_order_created: "polygon"
   map_order_executed: "polygon"
   map_order_cancelled: "polygon"
+
+network: polygon
+
+imports:
+  dcl: https://github.com/decentraland/decentraland-substreams/releases/download/1.4.0/decentraland-substreams-polygon.spkg
+  sql: https://github.com/streamingfast/substreams-sink-sql/releases/download/protodefs-v1.0.3/substreams-sink-sql-protodefs-v1.0.3.spkg
+
+sink:
+  module: dcl:db_out_polygon
+  type: sf.substreams.sink.sql.v1.Service
+  config:
+    schema: "./schema.sql"

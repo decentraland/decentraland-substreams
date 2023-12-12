@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: "decentraland_substreams"
-  version: v0.0.3
+  version: v1.4.0
 
 protobuf:
   files:
@@ -123,3 +123,15 @@ params:
   map_order_created: "sepolia"
   map_order_executed: "sepolia"
   map_order_cancelled: "sepolia"
+
+network: sepolia
+
+imports:
+  dcl: https://github.com/decentraland/decentraland-substreams/releases/download/1.4.0/decentraland-substreams-sepolia.spkg
+  sql: https://github.com/streamingfast/substreams-sink-sql/releases/download/protodefs-v1.0.3/substreams-sink-sql-protodefs-v1.0.3.spkg
+
+sink:
+  module: dcl:db_out
+  type: sf.substreams.sink.sql.v1.Service
+  config:
+    schema: "./schema.sql"

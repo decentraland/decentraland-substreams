@@ -105,7 +105,7 @@ modules:
       - map: map_collection_created # depends on the map and not store because the AddItem happens in the same block as the ProxyCreated event, so the store won't have the address yet
     output:
       type: proto:dcl.Items
-  
+
   - name: map_transfers_v2
     kind: map
     initialBlock: 14517370
@@ -169,3 +169,15 @@ params:
   map_order_created: "mumbai"
   map_order_executed: "mumbai"
   map_order_cancelled: "mumbai"
+
+network: mumbai
+
+imports:
+  dcl: https://github.com/decentraland/decentraland-substreams/releases/download/1.4.0/decentraland-substreams-mumbai.spkg
+  sql: https://github.com/streamingfast/substreams-sink-sql/releases/download/protodefs-v1.0.3/substreams-sink-sql-protodefs-v1.0.3.spkg
+
+sink:
+  module: dcl:db_out_polygon
+  type: sf.substreams.sink.sql.v1.Service
+  config:
+    schema: "./schema.sql"

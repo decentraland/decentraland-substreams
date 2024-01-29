@@ -44,6 +44,28 @@ pub fn insert_collection_is_approved_event(
     }
 }
 
+pub fn update_collection_transfer_ownership_event(
+    changes: &mut Tables,
+    transfer_ownership_events: dcl::CollectionTransferOwnershipEvents,
+) {
+    for event in transfer_ownership_events.events {
+        changes
+            .update_row("collections", dcl_hex!(event.collection.clone()))
+            .set("creator", dcl_hex!(event.to.clone()));
+    }
+}
+
+pub fn update_collection_transfer_creatoriship_event(
+    changes: &mut Tables,
+    transfer_creatorship_events: dcl::CollectionTransferCreatorshipEvents,
+) {
+    for event in transfer_creatorship_events.events {
+        changes
+            .update_row("collections", dcl_hex!(event.collection.clone()))
+            .set("owner", dcl_hex!(event.to.clone()));
+    }
+}
+
 pub fn insert_collection_search_is_store_minter(
     changes: &mut Tables,
     events: dcl::CollectionSetGlobalMinterEvents,

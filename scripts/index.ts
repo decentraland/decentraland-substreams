@@ -98,7 +98,7 @@ function runSinkSetupCommand(
   callback: (error: Error | null, stdout: string, stderr: string) => void
 ) {
   exec(
-    `../substreams-sink-postgres setup '${db}' ../schema.sql`,
+    `substreams-sink-postgres setup '${db}' ../schema.sql`,
     (error, stdout, stderr) => {
       callback(error, stdout, stderr);
     }

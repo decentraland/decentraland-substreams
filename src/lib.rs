@@ -368,7 +368,7 @@ pub fn map_collection_set_approved_event(
 
 // Reads the CreatorshipTransferred Event for collections v2
 #[substreams::handlers::map]
-pub fn map_collection_creatorship_transfer_event(
+pub fn map_collection_transfer_creatorship(
     blk: eth::Block,
     collections_store: substreams::store::StoreGetString,
 ) -> Result<dcl::CollectionTransferCreatorshipEvents, substreams::errors::Error> {
@@ -382,18 +382,18 @@ pub fn map_collection_creatorship_transfer_event(
 
             for log in call.logs.iter() {
                 let collection_address = &Hex(log.clone().address).to_string();
-                if let Some(_collection) = collections_store.get_last(collection_address) {
-                    if let Some(event) =
-                        abi::collections_v2::events::CreatorshipTransferred::match_and_decode(log)
-                    {
-                        substreams::log::info!("CreatorshipTransferred Event found! {:?}", event);
-                        let event = dcl::CollectionTransferCreatorshipEvent {
-                            collection: collection_address.to_string(),
-                            to: Hex(event.new_creator).to_string(),
-                        };
-                        events.push(event);
-                    }
+                // if let Some(_collection) = collections_store.get_last(collection_address) {
+                if let Some(event) =
+                    abi::collections_v2::events::CreatorshipTransferred::match_and_decode(log)
+                {
+                    substreams::log::info!("CreatorshipTransferred Event found! {:?}", event);
+                    let event = dcl::CollectionTransferCreatorshipEvent {
+                        collection: collection_address.to_string(),
+                        to: Hex(event.new_creator).to_string(),
+                    };
+                    events.push(event);
                 }
+                // }
             }
         }
     }
@@ -402,7 +402,7 @@ pub fn map_collection_creatorship_transfer_event(
 
 // Reads the OwnershipTransferred Event for collections v2
 #[substreams::handlers::map]
-pub fn map_collection_ownership_transfer_event(
+pub fn map_collection_transfer_ownership(
     blk: eth::Block,
     collections_store: substreams::store::StoreGetString,
 ) -> Result<dcl::CollectionTransferOwnershipEvents, substreams::errors::Error> {
@@ -416,18 +416,18 @@ pub fn map_collection_ownership_transfer_event(
 
             for log in call.logs.iter() {
                 let collection_address = &Hex(log.clone().address).to_string();
-                if let Some(_collection) = collections_store.get_last(collection_address) {
-                    if let Some(event) =
-                        abi::collections_v2::events::OwnershipTransferred::match_and_decode(log)
-                    {
-                        substreams::log::info!("OwnershipTransferred Event found! {:?}", event);
-                        let event = dcl::CollectionTransferOwnershipEvent {
-                            collection: collection_address.to_string(),
-                            to: Hex(event.new_owner).to_string(),
-                        };
-                        events.push(event);
-                    }
+                // if let Some(_collection) = collections_store.get_last(collection_address) {
+                if let Some(event) =
+                    abi::collections_v2::events::OwnershipTransferred::match_and_decode(log)
+                {
+                    substreams::log::info!("OwnershipTransferred Event found! {:?}", event);
+                    let event = dcl::CollectionTransferOwnershipEvent {
+                        collection: collection_address.to_string(),
+                        to: Hex(event.new_owner).to_string(),
+                    };
+                    events.push(event);
                 }
+                // }
             }
         }
     }

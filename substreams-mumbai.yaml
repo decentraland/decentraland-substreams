@@ -79,6 +79,24 @@ modules:
     output:
       type: proto:dcl.SetItemMinterEvents
 
+  - name: map_collection_transfer_creatorship
+    kind: map
+    initialBlock: 33639472
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections
+    output:
+      type: proto:dcl.CollectionTransferCreatorshipEvents
+
+  - name: map_collection_transfer_ownership
+    kind: map
+    initialBlock: 33639472
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections
+    output:
+      type: proto:dcl.CollectionTransferOwnershipEvents
+
   - name: map_issues
     kind: map
     initialBlock: 14517370
@@ -154,6 +172,8 @@ modules:
       - map: map_collection_set_approved_event
       - map: map_collection_set_global_minter_event
       - map: map_collection_set_item_minter_event
+      - map: map_collection_transfer_creatorship
+      - map: map_collection_transfer_ownership
       - map: map_item_update_data_event
       - map: map_item_rescue_event
       - map: map_order_created

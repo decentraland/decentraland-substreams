@@ -61,6 +61,24 @@ message Collection {
     uint64 block_number = 15;
 }
 
+message CollectionTransferOwnershipEvent {
+  string collection = 1;
+  string to = 2;
+}
+
+message CollectionTransferOwnershipEvents {
+  repeated CollectionTransferOwnershipEvent events = 1;
+}
+
+message CollectionTransferCreatorshipEvent {
+  string collection = 1;
+  string to = 2;
+}
+
+message CollectionTransferCreatorshipEvents {
+  repeated CollectionTransferCreatorshipEvent events = 1;
+}
+
 message CollectionSetApprovedEvent {
     string collection = 1;
     bool new_value = 2;

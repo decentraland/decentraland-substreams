@@ -366,6 +366,74 @@ pub fn map_collection_set_approved_event(
     Ok(dcl::CollectionSetApprovedEvents { events })
 }
 
+// Reads the CreatorshipTransferred Event for collections v2
+#[substreams::handlers::map]
+pub fn map_collection_transfer_creatorship(
+    blk: eth::Block,
+    collections_store: substreams::store::StoreGetString,
+) -> Result<dcl::CollectionTransferCreatorshipEvents, substreams::errors::Error> {
+    let mut events = vec![];
+    for trx in blk.transactions() {
+        for call in trx.calls.iter() {
+            let _call_index = call.index;
+            if call.state_reverted {
+                continue;
+            }
+
+            for log in call.logs.iter() {
+                let collection_address = &Hex(log.clone().address).to_string();
+                // if let Some(_collection) = collections_store.get_last(collection_address) {
+                if let Some(event) =
+                    abi::collections_v2::events::CreatorshipTransferred::match_and_decode(log)
+                {
+                    substreams::log::info!("CreatorshipTransferred Event found! {:?}", event);
+                    let event = dcl::CollectionTransferCreatorshipEvent {
+                        collection: collection_address.to_string(),
+                        to: Hex(event.new_creator).to_string(),
+                    };
+                    events.push(event);
+                }
+                // }
+            }
+        }
+    }
+    Ok(dcl::CollectionTransferCreatorshipEvents { events })
+}
+
+// Reads the OwnershipTransferred Event for collections v2
+#[substreams::handlers::map]
+pub fn map_collection_transfer_ownership(
+    blk: eth::Block,
+    collections_store: substreams::store::StoreGetString,
+) -> Result<dcl::CollectionTransferOwnershipEvents, substreams::errors::Error> {
+    let mut events = vec![];
+    for trx in blk.transactions() {
+        for call in trx.calls.iter() {
+            let _call_index = call.index;
+            if call.state_reverted {
+                continue;
+            }
+
+            for log in call.logs.iter() {
+                let collection_address = &Hex(log.clone().address).to_string();
+                // if let Some(_collection) = collections_store.get_last(collection_address) {
+                if let Some(event) =
+                    abi::collections_v2::events::OwnershipTransferred::match_and_decode(log)
+                {
+                    substreams::log::info!("OwnershipTransferred Event found! {:?}", event);
+                    let event = dcl::CollectionTransferOwnershipEvent {
+                        collection: collection_address.to_string(),
+                        to: Hex(event.new_owner).to_string(),
+                    };
+                    events.push(event);
+                }
+                // }
+            }
+        }
+    }
+    Ok(dcl::CollectionTransferOwnershipEvents { events })
+}
+
 // Reads the RescueItem Event for collections v2
 #[substreams::handlers::map]
 pub fn map_item_rescue_event(
@@ -886,6 +954,8 @@ fn db_out_polygon(
     set_approved_events: dcl::CollectionSetApprovedEvents,
     set_store_minter_events: dcl::CollectionSetGlobalMinterEvents,
     set_item_minter_event: dcl::SetItemMinterEvents,
+    collection_transfer_creatorship_events: dcl::CollectionTransferCreatorshipEvents,
+    collection_transfer_ownership_events: dcl::CollectionTransferOwnershipEvents,
     update_item_data_events: dcl::ItemUpdateDataEvents,
     rescue_item_events: dcl::RescueItemEvents,
     orders: dcl::Orders,
@@ -917,6 +987,25 @@ fn db_out_polygon(
         "In db out set_item_minter_event {:?}",
         set_item_minter_event
     );
+    // CollectionTransferCreatorshipEvents
+    log::info!(
+        "In db out transfer_creatorship_events {:?}",
+        collection_transfer_creatorship_events
+    );
+    db::collections::update_collection_transfer_creatoriship_event(
+        &mut tables,
+        collection_transfer_creatorship_events,
+    );
+    // CollectionTransferOwnershipEvents
+    log::info!(
+        "In db out transfer_ownership_events {:?}",
+        collection_transfer_ownership_events
+    );
+    db::collections::update_collection_transfer_ownership_event(
+        &mut tables,
+        collection_transfer_ownership_events,
+    );
+
     db::items::update_item_minter(&mut tables, set_item_minter_event);
     //
     log::info!(

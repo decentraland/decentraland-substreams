@@ -1,4 +1,4 @@
-## There's one substreams yml created PR network. This is a dummy field just so the protogen command can generate the protobufs. 
+## There's one substreams yml created PR network. This is a dummy field just so the protogen command can generate the protobufs.
 specVersion: v0.1.0
 package:
   name: "decentraland_substreams"
@@ -20,7 +20,7 @@ binaries:
 modules:
   - name: map_collection_created
     kind: map
-    initialBlock: 15202000
+    initialBlock: 33639472
     inputs:
       - source: sf.ethereum.type.v2.Block
     output:
@@ -28,7 +28,7 @@ modules:
 
   - name: store_collections
     kind: store
-    initialBlock: 15202000
+    initialBlock: 33639472
     updatePolicy: set
     valueType: string
     inputs:
@@ -36,16 +36,34 @@ modules:
 
   - name: map_collection_set_approved_event
     kind: map
-    initialBlock: 15202000
+    initialBlock: 33639472
     inputs:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections
     output:
       type: proto:dcl.CollectionSetApprovedEvents
 
+  - name: map_collection_transfer_creatorship
+    kind: map
+    initialBlock: 33639472
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections
+    output:
+      type: proto:dcl.CollectionTransferCreatorshipEvents
+
+  - name: map_collection_transfer_ownership
+    kind: map
+    initialBlock: 33639472
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+      - store: store_collections
+    output:
+      type: proto:dcl.CollectionTransferOwnershipEvents
+
   - name: map_collection_set_global_minter_event
     kind: map
-    initialBlock: 15202000
+    initialBlock: 33639472
     inputs:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections
@@ -54,7 +72,7 @@ modules:
 
   - name: map_collection_set_item_minter_event
     kind: map
-    initialBlock: 15202000
+    initialBlock: 33639472
     inputs:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections
@@ -63,7 +81,7 @@ modules:
 
   - name: map_issues
     kind: map
-    initialBlock: 15202000
+    initialBlock: 33639472
     inputs:
       - source: sf.ethereum.type.v2.Block
       - store: store_collections
@@ -72,7 +90,7 @@ modules:
 
   - name: store_nfts_item
     kind: store
-    initialBlock: 15202000
+    initialBlock: 33639472
     updatePolicy: set
     valueType: string
     inputs:
@@ -80,7 +98,7 @@ modules:
 
   - name: map_add_items
     kind: map
-    initialBlock: 15202000
+    initialBlock: 33639472
     inputs:
       - source: sf.ethereum.type.v2.Block
       - map: map_collection_created # depends on the map and not store because the AddItem happens in the same block as the ProxyCreated event, so the store won't have the address yet
@@ -90,7 +108,7 @@ modules:
   # Orders
   - name: map_order_created
     kind: map
-    initialBlock: 15202000
+    initialBlock: 33639472
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -99,7 +117,7 @@ modules:
 
   - name: map_order_executed
     kind: map
-    initialBlock: 15202000
+    initialBlock: 33639472
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -108,7 +126,7 @@ modules:
 
   - name: map_order_cancelled
     kind: map
-    initialBlock: 15202000
+    initialBlock: 33639472
     inputs:
       - params: string
       - source: sf.ethereum.type.v2.Block
@@ -116,7 +134,7 @@ modules:
       type: proto:dcl.Orders
 
   - name: db_out_polygon
-    initialBlock: 15202000
+    initialBlock: 33639472
     kind: map
     inputs:
       - map: map_collection_created
@@ -125,6 +143,8 @@ modules:
       - map: map_collection_set_approved_event
       - map: map_collection_set_global_minter_event
       - map: map_collection_set_item_minter_event
+      - map: map_collection_transfer_creatorship
+      - map: map_collection_transfer_ownership
       - map: map_order_created
       - map: map_order_executed
       - map: map_order_cancelled

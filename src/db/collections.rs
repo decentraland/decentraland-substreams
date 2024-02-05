@@ -50,8 +50,8 @@ pub fn update_collection_transfer_ownership_event(
 ) {
     for event in transfer_ownership_events.events {
         changes
-            .update_row("collections", dcl_hex!(event.collection.clone()))
-            .set("creator", dcl_hex!(event.to.clone()));
+            .update_row("collections", dcl_hex!(event.collection))
+            .set("owner", dcl_hex!(event.to));
     }
 }
 
@@ -62,7 +62,7 @@ pub fn update_collection_transfer_creatoriship_event(
     for event in transfer_creatorship_events.events {
         changes
             .update_row("collections", dcl_hex!(event.collection.clone()))
-            .set("owner", dcl_hex!(event.to.clone()));
+            .set("creator", dcl_hex!(event.to.clone()));
     }
 }
 

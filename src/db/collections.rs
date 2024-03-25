@@ -67,11 +67,12 @@ pub fn update_collection_transfer_creatoriship_event(
 }
 
 pub fn insert_collection_search_is_store_minter(
+    network: &str,
     changes: &mut Tables,
     events: dcl::CollectionSetGlobalMinterEvents,
 ) {
     for event in events.events {
-        let is_store_minter = event.value && dcl_hex!(event.minter) == get_store_address("matic");
+        let is_store_minter = event.value && dcl_hex!(event.minter) == get_store_address(network);
         changes
             .create_row(
                 "collection_set_global_minter_events",

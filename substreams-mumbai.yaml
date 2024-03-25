@@ -165,6 +165,7 @@ modules:
     initialBlock: 14517370
     kind: map
     inputs:
+      - params: string
       - map: map_collection_created
       - map: map_add_items
       - map: map_issues
@@ -184,6 +185,7 @@ modules:
       type: proto:sf.substreams.sink.database.v1.DatabaseChanges
 
 params:
+  db_out: "mumbai"
   map_add_items: "mumbai"
   map_collection_created: "mumbai"
   map_order_created: "mumbai"

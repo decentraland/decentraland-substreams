@@ -947,6 +947,7 @@ fn db_out(
 
 #[substreams::handlers::map]
 fn db_out_polygon(
+    network: String,
     collections: dcl::Collections,
     items: dcl::Items,
     nfts: dcl::NfTs,
@@ -981,7 +982,11 @@ fn db_out_polygon(
     db::collections::insert_collection_is_approved_event(&mut tables, set_approved_events);
     // SetStoreMinterEvents
     log::info!("In db out set_store_minter {:?}", set_store_minter_events);
-    db::collections::insert_collection_search_is_store_minter(&mut tables, set_store_minter_events);
+    db::collections::insert_collection_search_is_store_minter(
+        &network,
+        &mut tables,
+        set_store_minter_events,
+    );
     // SetItemMinterEvents
     log::info!(
         "In db out set_item_minter_event {:?}",

@@ -79,7 +79,7 @@ pub fn map_add_items_v1(
                     managers: [].to_vec(),       // not used for v1
                     uri: collection_data.7,
                     urn: item_urn.clone(),
-                    image: utils::items::get_item_image(&item_urn),
+                    image: utils::items::get_item_image(&network, &item_urn),
                     created_at: blk.timestamp_seconds(),
                     updated_at: blk.timestamp_seconds(),
                     reviewed_at: blk.timestamp_seconds(),
@@ -710,7 +710,7 @@ pub fn map_add_items(
                     managers: [].to_vec(), //@TODO update this logic
                     uri: collection_data.7,
                     urn: item_urn.clone(),
-                    image: utils::items::get_item_image(&item_urn),
+                    image: utils::items::get_item_image(&network, &item_urn),
                     created_at: blk.timestamp_seconds(),
                     updated_at: blk.timestamp_seconds(),
                     reviewed_at: blk.timestamp_seconds(),

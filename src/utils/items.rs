@@ -80,21 +80,16 @@ pub fn build_metadata(item_id: &str, raw_metadata: &str, collection: &str) -> Me
     metadata
 }
 
-fn get_catalyst_base() -> String {
-    let network = "mainnet"; //@TODO fix this
-    if network == "mainnet" || network == "matic" {
-        return "https://peer.decentraland.org".to_string();
+fn get_catalyst_base(network: &str) -> String {
+    match network {
+        "mainnet" | "matic" => "https://peer.decentraland.org".to_string(),
+        "mumbai" | "sepolia" => "https://peer.decentraland.zone".to_string(),
+        _ => "".to_string(),
     }
-
-    if network == "mumbai" || network == "sepolia" {
-        return "https://peer.decentraland.zone".to_string();
-    }
-
-    "".to_string()
 }
 
-pub fn get_item_image(item_urn: &str) -> String {
-    let base_uri = get_catalyst_base();
+pub fn get_item_image(network: &str, item_urn: &str) -> String {
+    let base_uri = get_catalyst_base(network);
     format!(
         "{}/lambdas/collections/contents/{}/thumbnail",
         base_uri, item_urn

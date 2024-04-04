@@ -79,7 +79,7 @@ pub fn map_add_items_v1(
                     managers: [].to_vec(),       // not used for v1
                     uri: collection_data.7,
                     urn: item_urn.clone(),
-                    image: utils::items::get_item_image(&item_urn),
+                    image: utils::items::get_item_image(&network, &item_urn),
                     created_at: blk.timestamp_seconds(),
                     updated_at: blk.timestamp_seconds(),
                     reviewed_at: blk.timestamp_seconds(),
@@ -710,7 +710,7 @@ pub fn map_add_items(
                     managers: [].to_vec(), //@TODO update this logic
                     uri: collection_data.7,
                     urn: item_urn.clone(),
-                    image: utils::items::get_item_image(&item_urn),
+                    image: utils::items::get_item_image(&network, &item_urn),
                     created_at: blk.timestamp_seconds(),
                     updated_at: blk.timestamp_seconds(),
                     reviewed_at: blk.timestamp_seconds(),
@@ -947,6 +947,7 @@ fn db_out(
 
 #[substreams::handlers::map]
 fn db_out_polygon(
+    network: String,
     collections: dcl::Collections,
     items: dcl::Items,
     nfts: dcl::NfTs,
@@ -981,7 +982,11 @@ fn db_out_polygon(
     db::collections::insert_collection_is_approved_event(&mut tables, set_approved_events);
     // SetStoreMinterEvents
     log::info!("In db out set_store_minter {:?}", set_store_minter_events);
-    db::collections::insert_collection_search_is_store_minter(&mut tables, set_store_minter_events);
+    db::collections::insert_collection_search_is_store_minter(
+        &network,
+        &mut tables,
+        set_store_minter_events,
+    );
     // SetItemMinterEvents
     log::info!(
         "In db out set_item_minter_event {:?}",

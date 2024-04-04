@@ -273,6 +273,7 @@ enum WearableRarity {
   LEGENDARY = 4;
   MYTHIC = 5;
   UNIQUE = 6;
+  EXOTIC = 7;
 }
 
 enum WearableBodyShape {

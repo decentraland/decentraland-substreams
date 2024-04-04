@@ -2,389 +2,389 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct BigInt {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub value: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Items {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub items: ::prost::alloc::vec::Vec<Item>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Item {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub collection: ::prost::alloc::string::String,
-    #[prost(int64, tag="3")]
+    #[prost(int64, tag = "3")]
     pub blockchain_id: i64,
-    #[prost(string, tag="4")]
+    #[prost(string, tag = "4")]
     pub creator: ::prost::alloc::string::String,
-    #[prost(string, tag="5")]
+    #[prost(string, tag = "5")]
     pub item_type: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="6")]
+    #[prost(message, optional, tag = "6")]
     pub total_supply: ::core::option::Option<BigInt>,
-    #[prost(message, optional, tag="7")]
+    #[prost(message, optional, tag = "7")]
     pub max_supply: ::core::option::Option<BigInt>,
-    #[prost(string, tag="8")]
+    #[prost(string, tag = "8")]
     pub rarity: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="9")]
+    #[prost(message, optional, tag = "9")]
     pub creation_fee: ::core::option::Option<BigInt>,
-    #[prost(message, optional, tag="10")]
+    #[prost(message, optional, tag = "10")]
     pub available: ::core::option::Option<BigInt>,
-    #[prost(message, optional, tag="11")]
+    #[prost(message, optional, tag = "11")]
     pub price: ::core::option::Option<BigInt>,
-    #[prost(string, tag="12")]
+    #[prost(string, tag = "12")]
     pub beneficiary: ::prost::alloc::string::String,
-    #[prost(string, optional, tag="13")]
+    #[prost(string, optional, tag = "13")]
     pub content_hash: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, tag="14")]
+    #[prost(string, tag = "14")]
     pub uri: ::prost::alloc::string::String,
-    #[prost(string, tag="15")]
+    #[prost(string, tag = "15")]
     pub image: ::prost::alloc::string::String,
-    #[prost(string, repeated, tag="16")]
+    #[prost(string, repeated, tag = "16")]
     pub minters: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(string, repeated, tag="17")]
+    #[prost(string, repeated, tag = "17")]
     pub managers: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(message, optional, tag="18")]
+    #[prost(message, optional, tag = "18")]
     pub metadata: ::core::option::Option<Metadata>,
-    #[prost(string, tag="19")]
+    #[prost(string, tag = "19")]
     pub raw_metadata: ::prost::alloc::string::String,
-    #[prost(string, tag="20")]
+    #[prost(string, tag = "20")]
     pub urn: ::prost::alloc::string::String,
-    #[prost(uint64, tag="21")]
+    #[prost(uint64, tag = "21")]
     pub created_at: u64,
-    #[prost(uint64, tag="22")]
+    #[prost(uint64, tag = "22")]
     pub updated_at: u64,
-    #[prost(uint64, tag="23")]
+    #[prost(uint64, tag = "23")]
     pub reviewed_at: u64,
-    #[prost(uint64, optional, tag="24")]
+    #[prost(uint64, optional, tag = "24")]
     pub sold_at: ::core::option::Option<u64>,
-    #[prost(uint64, optional, tag="25")]
+    #[prost(uint64, optional, tag = "25")]
     pub first_listed_at: ::core::option::Option<u64>,
-    #[prost(uint64, tag="26")]
+    #[prost(uint64, tag = "26")]
     pub block_number: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Collections {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub collections: ::prost::alloc::vec::Vec<Collection>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Collection {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub address: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
+    #[prost(string, tag = "3")]
     pub symbol: ::prost::alloc::string::String,
-    #[prost(string, tag="4")]
+    #[prost(string, tag = "4")]
     pub creator: ::prost::alloc::string::String,
-    #[prost(string, tag="5")]
+    #[prost(string, tag = "5")]
     pub owner: ::prost::alloc::string::String,
-    #[prost(bool, tag="6")]
+    #[prost(bool, tag = "6")]
     pub is_completed: bool,
-    #[prost(bool, tag="7")]
+    #[prost(bool, tag = "7")]
     pub is_editable: bool,
-    #[prost(string, repeated, tag="8")]
+    #[prost(string, repeated, tag = "8")]
     pub minters: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(string, repeated, tag="9")]
+    #[prost(string, repeated, tag = "9")]
     pub managers: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(string, tag="10")]
+    #[prost(string, tag = "10")]
     pub urn: ::prost::alloc::string::String,
-    #[prost(uint64, tag="11")]
+    #[prost(uint64, tag = "11")]
     pub created_at: u64,
-    #[prost(uint64, tag="12")]
+    #[prost(uint64, tag = "12")]
     pub updated_at: u64,
-    #[prost(uint64, tag="13")]
+    #[prost(uint64, tag = "13")]
     pub reviewed_at: u64,
-    #[prost(uint64, optional, tag="14")]
+    #[prost(uint64, optional, tag = "14")]
     pub first_listed_at: ::core::option::Option<u64>,
-    #[prost(uint64, tag="15")]
+    #[prost(uint64, tag = "15")]
     pub block_number: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CollectionTransferOwnershipEvent {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub collection: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub to: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CollectionTransferOwnershipEvents {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<CollectionTransferOwnershipEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CollectionTransferCreatorshipEvent {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub collection: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub to: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CollectionTransferCreatorshipEvents {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<CollectionTransferCreatorshipEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CollectionSetApprovedEvent {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub collection: ::prost::alloc::string::String,
-    #[prost(bool, tag="2")]
+    #[prost(bool, tag = "2")]
     pub new_value: bool,
-    #[prost(string, tag="3")]
+    #[prost(string, tag = "3")]
     pub updated_at: ::prost::alloc::string::String,
-    #[prost(uint64, tag="4")]
+    #[prost(uint64, tag = "4")]
     pub block_number: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CollectionSetApprovedEvents {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<CollectionSetApprovedEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CollectionSetGlobalMinterEvent {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub collection: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub minter: ::prost::alloc::string::String,
-    #[prost(bool, tag="3")]
+    #[prost(bool, tag = "3")]
     pub value: bool,
-    #[prost(string, tag="4")]
+    #[prost(string, tag = "4")]
     pub timestamp: ::prost::alloc::string::String,
-    #[prost(uint64, tag="5")]
+    #[prost(uint64, tag = "5")]
     pub block_number: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CollectionSetGlobalMinterEvents {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<CollectionSetGlobalMinterEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ItemUpdateDataEvent {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub collection: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub item: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="3")]
+    #[prost(message, optional, tag = "3")]
     pub price: ::core::option::Option<BigInt>,
-    #[prost(string, tag="4")]
+    #[prost(string, tag = "4")]
     pub beneficiary: ::prost::alloc::string::String,
-    #[prost(string, tag="5")]
+    #[prost(string, tag = "5")]
     pub raw_metadata: ::prost::alloc::string::String,
-    #[prost(uint64, tag="6")]
+    #[prost(uint64, tag = "6")]
     pub timestamp: u64,
-    #[prost(uint64, tag="7")]
+    #[prost(uint64, tag = "7")]
     pub block_number: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ItemUpdateDataEvents {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<ItemUpdateDataEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RescueItemEvent {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub collection: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub item: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
+    #[prost(string, tag = "3")]
     pub raw_metadata: ::prost::alloc::string::String,
-    #[prost(uint64, tag="4")]
+    #[prost(uint64, tag = "4")]
     pub timestamp: u64,
-    #[prost(uint64, tag="5")]
+    #[prost(uint64, tag = "5")]
     pub block_number: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RescueItemEvents {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<RescueItemEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TransferEvent {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub from: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub to: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
+    #[prost(string, tag = "3")]
     pub token_id: ::prost::alloc::string::String,
-    #[prost(string, tag="4")]
+    #[prost(string, tag = "4")]
     pub contract: ::prost::alloc::string::String,
-    #[prost(uint64, tag="5")]
+    #[prost(uint64, tag = "5")]
     pub timestamp: u64,
-    #[prost(uint64, tag="6")]
+    #[prost(uint64, tag = "6")]
     pub block_number: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TransferEvents {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<TransferEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SetItemMinterEvent {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub item: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub collection: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
+    #[prost(string, tag = "3")]
     pub minter: ::prost::alloc::string::String,
-    #[prost(string, tag="4")]
+    #[prost(string, tag = "4")]
     pub value: ::prost::alloc::string::String,
-    #[prost(string, tag="5")]
+    #[prost(string, tag = "5")]
     pub timestamp: ::prost::alloc::string::String,
-    #[prost(uint64, tag="6")]
+    #[prost(uint64, tag = "6")]
     pub block_number: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SetItemMinterEvents {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<SetItemMinterEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ItemMinters {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub item: ::prost::alloc::string::String,
-    #[prost(string, repeated, tag="2")]
+    #[prost(string, repeated, tag = "2")]
     pub minters: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NfTs {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub nfts: ::prost::alloc::vec::Vec<Nft>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Nft {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub owner: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub beneficiary: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="3")]
+    #[prost(message, optional, tag = "3")]
     pub token_id: ::core::option::Option<BigInt>,
-    #[prost(string, tag="4")]
+    #[prost(string, tag = "4")]
     pub item_id: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="5")]
+    #[prost(message, optional, tag = "5")]
     pub issued_id: ::core::option::Option<BigInt>,
-    #[prost(string, tag="6")]
+    #[prost(string, tag = "6")]
     pub collection_address: ::prost::alloc::string::String,
-    #[prost(string, tag="7")]
+    #[prost(string, tag = "7")]
     pub created_at: ::prost::alloc::string::String,
-    #[prost(string, tag="8")]
+    #[prost(string, tag = "8")]
     pub updated_at: ::prost::alloc::string::String,
-    #[prost(uint64, tag="9")]
+    #[prost(uint64, tag = "9")]
     pub block_number: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Orders {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub orders: ::prost::alloc::vec::Vec<Order>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Order {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub marketplace_address: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
+    #[prost(string, tag = "3")]
     pub nft: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="4")]
+    #[prost(message, optional, tag = "4")]
     pub token_id: ::core::option::Option<BigInt>,
-    #[prost(string, tag="5")]
+    #[prost(string, tag = "5")]
     pub tx_hash: ::prost::alloc::string::String,
-    #[prost(string, tag="6")]
+    #[prost(string, tag = "6")]
     pub owner: ::prost::alloc::string::String,
-    #[prost(string, tag="7")]
+    #[prost(string, tag = "7")]
     pub buyer: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="8")]
+    #[prost(message, optional, tag = "8")]
     pub price: ::core::option::Option<BigInt>,
-    #[prost(string, tag="9")]
+    #[prost(string, tag = "9")]
     pub status: ::prost::alloc::string::String,
-    #[prost(uint64, tag="10")]
+    #[prost(uint64, tag = "10")]
     pub block_number: u64,
-    #[prost(uint64, tag="11")]
+    #[prost(uint64, tag = "11")]
     pub created_at: u64,
-    #[prost(message, optional, tag="12")]
+    #[prost(message, optional, tag = "12")]
     pub expires_at: ::core::option::Option<BigInt>,
-    #[prost(uint64, tag="13")]
+    #[prost(uint64, tag = "13")]
     pub updated_at: u64,
-    #[prost(string, tag="14")]
+    #[prost(string, tag = "14")]
     pub item: ::prost::alloc::string::String,
-    #[prost(string, tag="15")]
+    #[prost(string, tag = "15")]
     pub nft_address: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Metadata {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub item_type: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="3")]
+    #[prost(message, optional, tag = "3")]
     pub wearable: ::core::option::Option<Wearable>,
-    #[prost(message, optional, tag="4")]
+    #[prost(message, optional, tag = "4")]
     pub emote: ::core::option::Option<Emote>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Wearable {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
+    #[prost(string, tag = "3")]
     pub description: ::prost::alloc::string::String,
-    #[prost(string, tag="4")]
+    #[prost(string, tag = "4")]
     pub collection: ::prost::alloc::string::String,
-    #[prost(string, tag="5")]
+    #[prost(string, tag = "5")]
     pub category: ::prost::alloc::string::String,
-    #[prost(string, repeated, tag="6")]
+    #[prost(string, repeated, tag = "6")]
     pub body_shapes: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Emote {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
+    #[prost(string, tag = "3")]
     pub description: ::prost::alloc::string::String,
-    #[prost(string, tag="4")]
+    #[prost(string, tag = "4")]
     pub collection: ::prost::alloc::string::String,
-    #[prost(string, tag="5")]
+    #[prost(string, tag = "5")]
     pub category: ::prost::alloc::string::String,
-    #[prost(bool, tag="6")]
+    #[prost(bool, tag = "6")]
     pub r#loop: bool,
-    #[prost(string, repeated, tag="7")]
+    #[prost(string, repeated, tag = "7")]
     pub body_shapes: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(bool, tag="8")]
+    #[prost(bool, tag = "8")]
     pub has_sound: bool,
-    #[prost(bool, tag="9")]
+    #[prost(bool, tag = "9")]
     pub has_geometry: bool,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
@@ -544,6 +544,7 @@ pub enum WearableRarity {
     Legendary = 4,
     Mythic = 5,
     Unique = 6,
+    Exotic = 7,
 }
 impl WearableRarity {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -559,6 +560,7 @@ impl WearableRarity {
             WearableRarity::Legendary => "LEGENDARY",
             WearableRarity::Mythic => "MYTHIC",
             WearableRarity::Unique => "UNIQUE",
+            WearableRarity::Exotic => "EXOTIC",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -571,6 +573,7 @@ impl WearableRarity {
             "LEGENDARY" => Some(Self::Legendary),
             "MYTHIC" => Some(Self::Mythic),
             "UNIQUE" => Some(Self::Unique),
+            "EXOTIC" => Some(Self::Exotic),
             _ => None,
         }
     }

@@ -544,6 +544,7 @@ pub enum WearableRarity {
     Legendary = 4,
     Mythic = 5,
     Unique = 6,
+    Exotic = 7
 }
 impl WearableRarity {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -559,6 +560,7 @@ impl WearableRarity {
             WearableRarity::Legendary => "LEGENDARY",
             WearableRarity::Mythic => "MYTHIC",
             WearableRarity::Unique => "UNIQUE",
+            WearableRarity::Exotic => "EXOTIC",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -571,6 +573,7 @@ impl WearableRarity {
             "LEGENDARY" => Some(Self::Legendary),
             "MYTHIC" => Some(Self::Mythic),
             "UNIQUE" => Some(Self::Unique),
+            "EXOTIC" => Some(Self::Exotic),
             _ => None,
         }
     }

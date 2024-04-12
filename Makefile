@@ -1,4 +1,4 @@
-ENDPOINT ?= base.substreams.pinax.network:443 
+ENDPOINT ?= base.substreams.pinax.network:443
 START_BLOCK ?= 12292922
 STOP_BLOCK ?= +10
 

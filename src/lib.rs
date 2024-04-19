@@ -272,19 +272,20 @@ pub fn map_issues_v1(
 
 /////// ---- ITEMS V2 ----- ///////
 
-fn get_factories_contracts(network: &str) -> [&[u8]; 2] {
-    if network == "mumbai" {
-        [
+fn get_factories_contracts(network: &str) -> Vec<&[u8]> {
+    match network {
+        // TODO: Remove mumbai after the migration
+        "mumbai" => vec![
             &COLLECTIONS_FACTORY_MUMBAI[..],
             &COLLECTIONS_V3_FACTORY_MUMBAI[..],
-        ]
-    }
-    else if network == "amoy" {
-        [
+        ],
+        "amoy" => vec![
             &COLLECTIONS_V3_FACTORY_AMOY[..],
         ]
-    } else {
-        [&COLLECTIONS_FACTORY[..], &COLLECTIONS_V3_FACTORY[..]]
+        _ => vec![
+            &COLLECTIONS_FACTORY[..],
+            &COLLECTIONS_V3_FACTORY[..],
+        ]
     }
 }
 

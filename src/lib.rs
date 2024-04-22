@@ -281,7 +281,7 @@ fn get_factories_contracts(network: &str) -> Vec<&[u8]> {
         ],
         "amoy" => vec![
             &COLLECTIONS_V3_FACTORY_AMOY[..],
-        ]
+        ],
         _ => vec![
             &COLLECTIONS_FACTORY[..],
             &COLLECTIONS_V3_FACTORY[..],

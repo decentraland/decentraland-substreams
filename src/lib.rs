@@ -9,8 +9,8 @@ mod utils;
 
 use constants::{
     COLLECTIONS_FACTORY, COLLECTIONS_FACTORY_MUMBAI, COLLECTIONS_V3_FACTORY,
-    COLLECTIONS_V3_FACTORY_MUMBAI, MARKETPLACEV1_CONTRACT, MARKETPLACEV1_CONTRACT_MUMBAI,
-    MARKETPLACEV2_CONTRACT, MARKETPLACEV2_CONTRACT_MUMBAI, MARKETPLACE_MAINNET_CONTRACT,
+    COLLECTIONS_V3_FACTORY_MUMBAI, COLLECTIONS_V3_FACTORY_AMOY, MARKETPLACEV1_CONTRACT, MARKETPLACEV1_CONTRACT_MUMBAI,
+    MARKETPLACEV2_CONTRACT, MARKETPLACEV2_CONTRACT_MUMBAI, MARKETPLACEV2_CONTRACT_AMOY, MARKETPLACE_MAINNET_CONTRACT,
     MARKETPLACE_SEPOLIA_CONTRACT,
 };
 use data::constants::collections_v1;
@@ -272,14 +272,20 @@ pub fn map_issues_v1(
 
 /////// ---- ITEMS V2 ----- ///////
 
-fn get_factories_contracts(network: &str) -> [&[u8]; 2] {
-    if network == "mumbai" {
-        [
+fn get_factories_contracts(network: &str) -> Vec<&[u8]> {
+    match network {
+        // TODO: Remove mumbai after the migration
+        "mumbai" => vec![
             &COLLECTIONS_FACTORY_MUMBAI[..],
             &COLLECTIONS_V3_FACTORY_MUMBAI[..],
+        ],
+        "amoy" => vec![
+            &COLLECTIONS_V3_FACTORY_AMOY[..],
+        ],
+        _ => vec![
+            &COLLECTIONS_FACTORY[..],
+            &COLLECTIONS_V3_FACTORY[..],
         ]
-    } else {
-        [&COLLECTIONS_FACTORY[..], &COLLECTIONS_V3_FACTORY[..]]
     }
 }
 
@@ -778,6 +784,7 @@ fn get_marketplace_contract(network: &str) -> Vec<&[u8]> {
             &MARKETPLACEV1_CONTRACT_MUMBAI,
             &MARKETPLACEV2_CONTRACT_MUMBAI,
         ],
+        "amoy" => vec![&MARKETPLACEV2_CONTRACT_AMOY],
         "polygon" => vec![&MARKETPLACEV1_CONTRACT, &MARKETPLACEV2_CONTRACT],
         _ => vec![&MARKETPLACE_SEPOLIA_CONTRACT],
     }

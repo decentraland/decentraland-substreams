@@ -26,7 +26,7 @@ done
 psql_string=$SUBSTREAMS_DATABASE
 
 # Prompt the user to enter the network
-read -p "Enter the network: (mainnet, sepolia, polygon or mumbai) " network
+read -p "Enter the network: (mainnet, sepolia, polygon or amoy) " network
 read -p "Enter the PostgreSQL schema to sink to: " psql_schema
 # Read the version number from the user
 read -p "Enter the version number: " version_number
@@ -45,7 +45,7 @@ case $network in
     "sepolia")
         prometheus_port="9104"
         ;;
-    "mumbai")
+    "amoy")
         prometheus_port="9105"
         ;;
     *)

@@ -94,7 +94,7 @@ pub fn transform_item_database_changes(
     items: dcl::Items,
     collections_v1_store: StoreGetInt64,
 ) {
-    if network == "polygon" || network == "mumbai" {
+    if network == "polygon" || network == "mumbai" || network == "amoy" {
         transform_item_v2_database_changes(changes, items);
     } else {
         transform_item_v1_database_changes(changes, items, collections_v1_store);

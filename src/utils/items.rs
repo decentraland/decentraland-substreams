@@ -83,7 +83,7 @@ pub fn build_metadata(item_id: &str, raw_metadata: &str, collection: &str) -> Me
 fn get_catalyst_base(network: &str) -> String {
     match network {
         "mainnet" | "matic" => "https://peer.decentraland.org".to_string(),
-        "mumbai" | "sepolia" => "https://peer.decentraland.zone".to_string(),
+        "mumbai" | "amoy" | "sepolia" => "https://peer.decentraland.zone".to_string(),
         _ => "".to_string(),
     }
 }

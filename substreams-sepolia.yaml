@@ -98,6 +98,15 @@ modules:
     output:
       type: proto:dcl.Orders
 
+  - name: map_land_transfers
+    kind: map
+    initialBlock: 3831217
+    inputs:
+      - params: string
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:dcl.LandTransfers
+
   - name: db_out
     initialBlock: 3831225
     kind: map
@@ -123,6 +132,7 @@ params:
   map_order_created: "sepolia"
   map_order_executed: "sepolia"
   map_order_cancelled: "sepolia"
+  map_land_transfers: "sepolia"
 
 network: sepolia
 

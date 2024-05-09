@@ -280,3 +280,14 @@ enum WearableBodyShape {
   BASE_FEMALE = 0;
   BASE_MALE = 1;
 }
+
+message LandTransfers {
+  repeated LandTransfer landTransfers = 1;
+}
+
+message LandTransfer {
+  string from = 1;
+  string to = 2;
+  BigInt asset_id = 3;
+  uint64 timestamp = 4;
+}

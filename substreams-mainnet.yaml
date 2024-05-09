@@ -98,6 +98,15 @@ modules:
     output:
       type: proto:dcl.Orders
 
+  - name: map_land_transfers
+    kind: map
+    initialBlock: 14373380
+    inputs:
+      - params: string
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:dcl.LandTransfers
+
   - name: db_out
     initialBlock: 8828687
     kind: map

@@ -39,6 +39,7 @@ pub fn map_add_items_v1(
     } else {
         collections_v1::COLLECTIONS_MAINNET
     };
+
     Ok(dcl::Items {
         items: blk
             .events::<abi::erc721::events::AddWearable>(contracts)
@@ -900,6 +901,38 @@ pub fn map_order_cancelled(
                     block_number: blk.number,
                     updated_at: blk.timestamp_seconds(),
                     created_at: blk.timestamp_seconds(),
+                }
+            })
+            .collect(),
+    })
+}
+
+fn get_lands_contract(network: &str) -> Vec<&[u8]> {
+    match network {
+        "sepolia" => vec![&LANDS_SEPOLIA_CONTRACT],
+        "mainnet" => vec![&LANDS_MAINNET_CONTRACT],
+        _ => vec![&LANDS_SEPOLIA_CONTRACT],
+    }
+}
+
+// Land transfers
+#[substreams::handlers::map]
+pub fn map_land_transfers(
+    network: String,
+    blk: eth::Block,
+) -> Result<dcl::LandTransfers, substreams::errors::Error> {
+    substreams::log::info!("Network {:?}", network);
+    let contract = get_lands_contract(&network);
+    Ok(dcl::LandTransfers {
+        land_transfers: blk
+            .events::<abi::lands::events::Transfer3>(&contract)
+            .map(|(event, _)| {
+                substreams::log::info!("Land Transfer {:?}", event);
+                dcl::LandTransfer {
+                    from: Hex(event.from).to_string(),
+                    to: Hex(event.to).to_string(),
+                    asset_id: Some(event.asset_id.into()),
+                    timestamp: blk.timestamp_seconds(),
                 }
             })
             .collect(),

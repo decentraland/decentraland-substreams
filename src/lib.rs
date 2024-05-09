@@ -9,9 +9,9 @@ mod utils;
 
 use constants::{
     COLLECTIONS_FACTORY, COLLECTIONS_FACTORY_MUMBAI, COLLECTIONS_V3_FACTORY,
-    COLLECTIONS_V3_FACTORY_MUMBAI, COLLECTIONS_V3_FACTORY_AMOY, MARKETPLACEV1_CONTRACT, MARKETPLACEV1_CONTRACT_MUMBAI,
-    MARKETPLACEV2_CONTRACT, MARKETPLACEV2_CONTRACT_MUMBAI, MARKETPLACEV2_CONTRACT_AMOY, MARKETPLACE_MAINNET_CONTRACT,
-    MARKETPLACE_SEPOLIA_CONTRACT,
+    COLLECTIONS_V3_FACTORY_AMOY, COLLECTIONS_V3_FACTORY_MUMBAI, MARKETPLACEV1_CONTRACT,
+    MARKETPLACEV1_CONTRACT_MUMBAI, MARKETPLACEV2_CONTRACT, MARKETPLACEV2_CONTRACT_AMOY,
+    MARKETPLACEV2_CONTRACT_MUMBAI, MARKETPLACE_MAINNET_CONTRACT, MARKETPLACE_SEPOLIA_CONTRACT,
 };
 use data::constants::collections_v1;
 use pb::dcl;
@@ -279,13 +279,8 @@ fn get_factories_contracts(network: &str) -> Vec<&[u8]> {
             &COLLECTIONS_FACTORY_MUMBAI[..],
             &COLLECTIONS_V3_FACTORY_MUMBAI[..],
         ],
-        "amoy" => vec![
-            &COLLECTIONS_V3_FACTORY_AMOY[..],
-        ],
-        _ => vec![
-            &COLLECTIONS_FACTORY[..],
-            &COLLECTIONS_V3_FACTORY[..],
-        ]
+        "amoy" => vec![&COLLECTIONS_V3_FACTORY_AMOY[..]],
+        _ => vec![&COLLECTIONS_FACTORY[..], &COLLECTIONS_V3_FACTORY[..]],
     }
 }
 
@@ -388,18 +383,18 @@ pub fn map_collection_transfer_creatorship(
 
             for log in call.logs.iter() {
                 let collection_address = &Hex(log.clone().address).to_string();
-                // if let Some(_collection) = collections_store.get_last(collection_address) {
-                if let Some(event) =
-                    abi::collections_v2::events::CreatorshipTransferred::match_and_decode(log)
-                {
-                    substreams::log::info!("CreatorshipTransferred Event found! {:?}", event);
-                    let event = dcl::CollectionTransferCreatorshipEvent {
-                        collection: collection_address.to_string(),
-                        to: Hex(event.new_creator).to_string(),
-                    };
-                    events.push(event);
+                if let Some(_collection) = collections_store.get_last(collection_address) {
+                    if let Some(event) =
+                        abi::collections_v2::events::CreatorshipTransferred::match_and_decode(log)
+                    {
+                        substreams::log::info!("CreatorshipTransferred Event found! {:?}", event);
+                        let event = dcl::CollectionTransferCreatorshipEvent {
+                            collection: collection_address.to_string(),
+                            to: Hex(event.new_creator).to_string(),
+                        };
+                        events.push(event);
+                    }
                 }
-                // }
             }
         }
     }
@@ -422,18 +417,18 @@ pub fn map_collection_transfer_ownership(
 
             for log in call.logs.iter() {
                 let collection_address = &Hex(log.clone().address).to_string();
-                // if let Some(_collection) = collections_store.get_last(collection_address) {
-                if let Some(event) =
-                    abi::collections_v2::events::OwnershipTransferred::match_and_decode(log)
-                {
-                    substreams::log::info!("OwnershipTransferred Event found! {:?}", event);
-                    let event = dcl::CollectionTransferOwnershipEvent {
-                        collection: collection_address.to_string(),
-                        to: Hex(event.new_owner).to_string(),
-                    };
-                    events.push(event);
+                if let Some(_collection) = collections_store.get_last(collection_address) {
+                    if let Some(event) =
+                        abi::collections_v2::events::OwnershipTransferred::match_and_decode(log)
+                    {
+                        substreams::log::info!("OwnershipTransferred Event found! {:?}", event);
+                        let event = dcl::CollectionTransferOwnershipEvent {
+                            collection: collection_address.to_string(),
+                            to: Hex(event.new_owner).to_string(),
+                        };
+                        events.push(event);
+                    }
                 }
-                // }
             }
         }
     }

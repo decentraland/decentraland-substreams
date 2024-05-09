@@ -5,26 +5,32 @@ SET search_path TO dcl32;
 
 --- collection_minters_view
 CREATE MATERIALIZED VIEW collection_minters_view AS
-SELECT collection_id,
-       search_is_store_minter AS is_store_minter,
-       timestamp,
-       (
-                SELECT MIN(timestamp) 
-                FROM collection_set_global_minter_events 
-                WHERE collection_id = subquery.collection_id AND search_is_store_minter = true
-            ) AS first_listed_at
+SELECT 
+	minter,
+    collection_id,
+    search_is_store_minter AS is_store_minter,
+    timestamp,
+    (
+        SELECT MIN(timestamp) 
+        FROM collection_set_global_minter_events 
+        WHERE collection_id = subquery.collection_id AND search_is_store_minter = true
+    ) AS first_listed_at
 FROM (
-    SELECT collection_id,
-           value,
-           minter,
-           timestamp,
-           search_is_store_minter,
-           ROW_NUMBER() OVER (
-               PARTITION BY collection_id
-               ORDER BY timestamp DESC
-           ) AS row_num
+    SELECT 
+    	minter,
+        collection_id,
+        timestamp,
+        -- Calculate search_is_store_minter based on the minter's address
+        CASE
+            WHEN minter IN ('0x214ffc0f0103735728dc66b61a22e4f163e275ae', '0xe36abc9ec616c83caaa386541380829106149d68') THEN true
+            ELSE false
+        END AS search_is_store_minter,
+        ROW_NUMBER() OVER (
+            PARTITION BY collection_id
+            ORDER BY timestamp DESC
+        ) AS row_num
     FROM collection_set_global_minter_events
-    WHERE (minter = '0x214ffc0f0103735728dc66b61a22e4f163e275ae' OR minter = '0x6ddF1b1924DAD850AdBc1C02026535464Be06B0c')
+    WHERE minter IN ('0x214ffc0f0103735728dc66b61a22e4f163e275ae', '0xe36abc9ec616c83caaa386541380829106149d68')
 ) AS subquery
 WHERE subquery.row_num = 1;
 

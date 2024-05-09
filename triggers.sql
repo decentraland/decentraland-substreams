@@ -206,6 +206,8 @@ FROM
 WHERE
     row_num = 1;
 
+CREATE UNIQUE INDEX idx_collection_set_approved_events_view_collection_id 
+ON collection_set_approved_events_view(collection_id);
 ----- item_sold_at_view
 
 CREATE MATERIALIZED VIEW item_sold_at_view AS

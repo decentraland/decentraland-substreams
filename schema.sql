@@ -1,5 +1,3 @@
-
-
 -- Declare a variable to store the entity_schema value
 DO $$
 DECLARE schema_name TEXT;
@@ -20,6 +18,7 @@ EXECUTE 'SET search_path TO ' || schema_name;
 RAISE NOTICE 'Current working schema set to: %',
 schema_name;
 END $$;
+
 CREATE TABLE collections (
     id TEXT NOT NULL PRIMARY KEY,
     owner TEXT NOT NULL,
@@ -37,6 +36,7 @@ CREATE TABLE collections (
     first_listed_at numeric,
     block_number numeric NOT NULL
 );
+
 create TABLE items (
     id TEXT NOT NULL PRIMARY KEY,
     collection TEXT NOT NULL,
@@ -65,6 +65,7 @@ create TABLE items (
     first_listed_at numeric,
     block_number numeric NOT NULL
 );
+
 CREATE TABLE metadata (
     id text NOT NULL PRIMARY KEY,
     item_id TEXT NOT NULL,
@@ -74,6 +75,7 @@ CREATE TABLE metadata (
     timestamp numeric NOT NULL,
     block_number numeric NOT NULL
 );
+
 CREATE TABLE wearable (
     id text NOT NULL PRIMARY KEY,
     metadata text NOT NULL,
@@ -83,6 +85,7 @@ CREATE TABLE wearable (
     category text NOT NULL,
     body_shapes text []
 );
+
 CREATE TABLE emote (
     id text NOT NULL PRIMARY KEY,
     metadata text NOT NULL,
@@ -95,6 +98,7 @@ CREATE TABLE emote (
     has_sound boolean,
     has_geometry boolean
 );
+
 CREATE TABLE orders (
     id TEXT NOT NULL PRIMARY KEY,
     marketplace_address TEXT NOT NULL,
@@ -112,6 +116,7 @@ CREATE TABLE orders (
     updated_at numeric NOT NULL,
     block_number numeric NOT NULL
 );
+
 CREATE TABLE nfts (
     id TEXT NOT NULL PRIMARY KEY,
     token_id TEXT NOT NULL,
@@ -123,6 +128,7 @@ CREATE TABLE nfts (
     updated_at numeric NOT NULL,
     block_number numeric NOT NULL
 );
+
 CREATE TABLE item_minters (
     id TEXT NOT NULL PRIMARY KEY,
     item_id TEXT NOT NULL,
@@ -131,6 +137,7 @@ CREATE TABLE item_minters (
     timestamp numeric NOT NULL,
     block_number numeric NOT NULL
 );
+
 CREATE TABLE collection_set_approved_events (
     id TEXT NOT NULL PRIMARY KEY,
     collection_id TEXT NOT NULL,
@@ -138,6 +145,7 @@ CREATE TABLE collection_set_approved_events (
     timestamp numeric NOT NULL,
     block_number numeric NOT NULL
 );
+
 CREATE TABLE collection_set_global_minter_events (
     id TEXT NOT NULL PRIMARY KEY,
     collection_id TEXT NOT NULL,
@@ -147,6 +155,7 @@ CREATE TABLE collection_set_global_minter_events (
     timestamp numeric NOT NULL,
     block_number numeric NOT NULL
 );
+
 CREATE TABLE update_item_data_events (
     id TEXT NOT NULL PRIMARY KEY,
     collection_id TEXT NOT NULL,
@@ -157,6 +166,7 @@ CREATE TABLE update_item_data_events (
     timestamp numeric NOT NULL,
     block_number numeric NOT NULL
 );
+
 CREATE TABLE transfers (
     id TEXT NOT NULL PRIMARY KEY,
     "to" TEXT NOT NULL,
@@ -166,13 +176,36 @@ CREATE TABLE transfers (
     block_number numeric NOT NULL
 );
 
+CREATE TABLE land_transfers (
+    id TEXT NOT NULL PRIMARY KEY,
+    "from" TEXT NOT NULL,
+    "to" TEXT NOT NULL,
+    token_id TEXT NOT NULL,
+    timestamp numeric NOT NULL,
+    block_number numeric NOT NULL
+);
+
+CREATE TABLE name_transfers (
+    id TEXT NOT NULL PRIMARY KEY,
+    "from" TEXT NOT NULL,
+    "to" TEXT NOT NULL,
+    token_id TEXT NOT NULL,
+    timestamp numeric NOT NULL,
+    block_number numeric NOT NULL
+);
 
 --- INDEXES
-
 --@TODO ADD INDEXES HERE
 
-CREATE INDEX orders_nft_status_id_created_at_idx ON orders (nft, status, id, created_at DESC);
+CREATE INDEX orders_nft_status_id_created_at_idx ON orders (
+    nft,
+    status,
+    id,
+    created_at DESC
+);
+
 CREATE INDEX item_idx ON nfts (item);
+
 CREATE INDEX owner_idx ON nfts (owner);
 
 ---- cancel orders on transfer
@@ -188,6 +221,7 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER cancel_orders_on_transfer_trigger
-AFTER INSERT ON transfers
-FOR EACH ROW EXECUTE FUNCTION cancel_orders_on_transfer();
+CREATE TRIGGER cancel_orders_on_transfer_trigger AFTER
+INSERT
+    ON transfers FOR EACH ROW
+EXECUTE FUNCTION cancel_orders_on_transfer ();

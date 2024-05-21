@@ -400,10 +400,32 @@ pub struct LandTransfer {
     pub from: ::prost::alloc::string::String,
     #[prost(string, tag="2")]
     pub to: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="3")]
-    pub asset_id: ::core::option::Option<BigInt>,
+    #[prost(string, tag="3")]
+    pub token_id: ::prost::alloc::string::String,
     #[prost(uint64, tag="4")]
     pub timestamp: u64,
+    #[prost(uint64, tag="5")]
+    pub block_number: u64,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NameTransfers {
+    #[prost(message, repeated, tag="1")]
+    pub name_transfers: ::prost::alloc::vec::Vec<NameTransfer>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NameTransfer {
+    #[prost(string, tag="1")]
+    pub from: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub to: ::prost::alloc::string::String,
+    #[prost(string, tag="3")]
+    pub token_id: ::prost::alloc::string::String,
+    #[prost(uint64, tag="4")]
+    pub timestamp: u64,
+    #[prost(uint64, tag="5")]
+    pub block_number: u64,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]

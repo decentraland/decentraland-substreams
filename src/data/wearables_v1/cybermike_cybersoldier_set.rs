@@ -4,9 +4,9 @@ pub fn cybermike_cybersoldier_set() -> Vec<Wearable> {
     vec![
         Wearable::new(
             String::from("cybersoldier_nightvision_eyewear"),
-            String::from(String::from(
+            String::from(
                 "CYBERSOLDIER NIGHT VISION GOGGLES - Winter Soldier Collection - FROM CYBERMIKE ",
-            )),
+            ),
             String::from("By Cybermike - Live Free or Die Hard"),
             String::from("eyewear"),
             String::from("mythic"),
@@ -14,9 +14,9 @@ pub fn cybermike_cybersoldier_set() -> Vec<Wearable> {
         ),
         Wearable::new(
             String::from("cybersoldier_boots_feet"),
-            String::from(String::from(
+            String::from(
                 "CYBERSOLDIER HASTE BOOTS - Winter Soldier Collection - Mark III - FROM CYBERMIKE ",
-            )),
+            ),
             String::from("By Cybermike - Live Free or Die Hard"),
             String::from("feet"),
             String::from("mythic"),
@@ -34,9 +34,9 @@ pub fn cybermike_cybersoldier_set() -> Vec<Wearable> {
         ),
         Wearable::new(
             String::from("cybersoldier_leggings_lower_body"),
-            String::from(String::from(
+            String::from(
                 "CYBERSOLDIER LEGGINGS - Winter Soldier Collection - Mark III - FROM CYBERMIKE ",
-            )),
+            ),
             String::from("By Cybermike - Live Free or Die Hard"),
             String::from("lower_body"),
             String::from("mythic"),

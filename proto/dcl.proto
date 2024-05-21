@@ -280,3 +280,27 @@ enum WearableBodyShape {
   BASE_FEMALE = 0;
   BASE_MALE = 1;
 }
+
+message LandTransfers {
+  repeated LandTransfer landTransfers = 1;
+}
+
+message LandTransfer {
+  string from = 1;
+  string to = 2;
+  string token_id = 3;
+  uint64 timestamp = 4;
+  uint64 block_number = 5; 
+}
+
+message NameTransfers {
+  repeated NameTransfer nameTransfers = 1;
+}
+
+message NameTransfer {
+  string from = 1;
+  string to = 2;
+  string token_id = 3;
+  uint64 timestamp = 4;
+  uint64 block_number = 5; 
+}

@@ -24,3 +24,11 @@ pub mod collection_factory;
 #[path = "ERC721.rs"]
 #[allow(dead_code)]
 pub mod erc721;
+
+#[path = "Lands.rs"]
+#[allow(dead_code)]
+pub mod lands;
+
+#[path = "Names.rs"]
+#[allow(dead_code)]
+pub mod names;

@@ -30,10 +30,8 @@ impl From<dcl::BigInt> for BigInt {
 pub fn sanitize_sql_string(mut str: String) -> String {
     let cloned = str.clone();
     let v: Vec<_> = cloned.match_indices('\'').collect();
-    let mut quotes_scaped = 0;
-    for idx in v {
-        str.insert(idx.0 + quotes_scaped, '\'');
-        quotes_scaped = quotes_scaped + 1;
+    for (i, idx) in v.iter().enumerate() {
+        str.insert(idx.0 + i, '\'');
     }
     str
 }

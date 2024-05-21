@@ -74,7 +74,7 @@ pub fn collection_data_call(collection_address: Vec<u8>) -> CollectionDataTuple 
             let base_uri = RpcBatch::decode::<_, abi::collections_v2::functions::BaseUri>(
                 &responses.responses[7],
             )
-            .unwrap_or(String::from(""));
+            .unwrap_or_else(|| String::from(""));
 
             (
                 Hex(creator).to_string(),

@@ -32,5 +32,15 @@ fn main() -> Result<(), anyhow::Error> {
         .generate()?
         .write_to_file("src/abi/ERC721.rs")?;
 
+    // Lands
+    Abigen::new("Lands", "abi/Lands.json")?
+        .generate()?
+        .write_to_file("src/abi/Lands.rs")?;
+
+    // Names
+    Abigen::new("Names", "abi/Names.json")?
+        .generate()?
+        .write_to_file("src/abi/Names.rs")?;
+
     Ok(())
 }

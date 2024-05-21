@@ -9,9 +9,11 @@ mod utils;
 
 use constants::{
     COLLECTIONS_FACTORY, COLLECTIONS_FACTORY_MUMBAI, COLLECTIONS_V3_FACTORY,
-    COLLECTIONS_V3_FACTORY_AMOY, COLLECTIONS_V3_FACTORY_MUMBAI, MARKETPLACEV1_CONTRACT,
-    MARKETPLACEV1_CONTRACT_MUMBAI, MARKETPLACEV2_CONTRACT, MARKETPLACEV2_CONTRACT_AMOY,
-    MARKETPLACEV2_CONTRACT_MUMBAI, MARKETPLACE_MAINNET_CONTRACT, MARKETPLACE_SEPOLIA_CONTRACT,
+    COLLECTIONS_V3_FACTORY_AMOY, COLLECTIONS_V3_FACTORY_MUMBAI, LANDS_MAINNET_CONTRACT,
+    LANDS_SEPOLIA_CONTRACT, MARKETPLACEV1_CONTRACT, MARKETPLACEV1_CONTRACT_MUMBAI,
+    MARKETPLACEV2_CONTRACT, MARKETPLACEV2_CONTRACT_AMOY, MARKETPLACEV2_CONTRACT_MUMBAI,
+    MARKETPLACE_MAINNET_CONTRACT, MARKETPLACE_SEPOLIA_CONTRACT, NAMES_MAINNET_CONTRACT,
+    NAMES_SEPOLIA_CONTRACT,
 };
 use data::constants::collections_v1;
 use pb::dcl;
@@ -39,6 +41,7 @@ pub fn map_add_items_v1(
     } else {
         collections_v1::COLLECTIONS_MAINNET
     };
+
     Ok(dcl::Items {
         items: blk
             .events::<abi::erc721::events::AddWearable>(contracts)
@@ -906,6 +909,64 @@ pub fn map_order_cancelled(
     })
 }
 
+fn get_lands_contract(network: &str) -> Vec<&[u8]> {
+    match network {
+        "sepolia" => vec![&LANDS_SEPOLIA_CONTRACT],
+        "mainnet" => vec![&LANDS_MAINNET_CONTRACT],
+        _ => vec![&LANDS_SEPOLIA_CONTRACT],
+    }
+}
+
+fn get_names_contract(network: &str) -> Vec<&[u8]> {
+    match network {
+        "sepolia" => vec![&NAMES_SEPOLIA_CONTRACT],
+        "mainnet" => vec![&NAMES_MAINNET_CONTRACT],
+        _ => vec![&NAMES_SEPOLIA_CONTRACT],
+    }
+}
+
+// Land transfers
+#[substreams::handlers::map]
+pub fn map_land_transfers(
+    network: String,
+    blk: eth::Block,
+) -> Result<dcl::LandTransfers, substreams::errors::Error> {
+    let contract = get_lands_contract(&network);
+    Ok(dcl::LandTransfers {
+        land_transfers: blk
+            .events::<abi::lands::events::Transfer3>(&contract)
+            .map(|(event, _)| dcl::LandTransfer {
+                from: Hex(event.from).to_string(),
+                to: Hex(event.to).to_string(),
+                token_id: event.asset_id.into(),
+                timestamp: blk.timestamp_seconds(),
+                block_number: blk.number,
+            })
+            .collect(),
+    })
+}
+
+// Name transfers
+#[substreams::handlers::map]
+pub fn map_name_transfers(
+    network: String,
+    blk: eth::Block,
+) -> Result<dcl::NameTransfers, substreams::errors::Error> {
+    let contract = get_names_contract(&network);
+    Ok(dcl::NameTransfers {
+        name_transfers: blk
+            .events::<abi::names::events::Transfer>(&contract)
+            .map(|(event, _)| dcl::NameTransfer {
+                from: Hex(event.from).to_string(),
+                to: Hex(event.to).to_string(),
+                token_id: event.token_id.into(),
+                timestamp: blk.timestamp_seconds(),
+                block_number: blk.number,
+            })
+            .collect(),
+    })
+}
+
 // Outs
 
 #[substreams::handlers::map]
@@ -918,6 +979,8 @@ fn db_out(
     orders: dcl::Orders,
     orders_executed: dcl::Orders,
     orders_cancelled: dcl::Orders,
+    land_transfers: dcl::LandTransfers,
+    name_transfers: dcl::NameTransfers,
     store_nfts_item: StoreGetString,
     store_collections_v1: StoreGetInt64,
 ) -> Result<DatabaseChanges, substreams::errors::Error> {
@@ -943,6 +1006,14 @@ fn db_out(
     // Transfers
     log::info!("In db out transfers {:?}", transfers);
     db::transfers::update_transfers(&mut tables, transfers);
+
+    // Land transfers
+    log::info!("In db out land transfers, {:?}", land_transfers);
+    db::lands::transform_land_transfers_database_changes(&mut tables, land_transfers);
+
+    // Name transfers
+    log::info!("In db out name transfers, {:?}", name_transfers);
+    db::names::transform_name_transfers_database_changes(&mut tables, name_transfers);
 
     Ok(tables.to_database_changes())
 }

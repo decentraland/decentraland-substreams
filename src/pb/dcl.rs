@@ -387,6 +387,46 @@ pub struct Emote {
     #[prost(bool, tag="9")]
     pub has_geometry: bool,
 }
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct LandTransfers {
+    #[prost(message, repeated, tag="1")]
+    pub land_transfers: ::prost::alloc::vec::Vec<LandTransfer>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct LandTransfer {
+    #[prost(string, tag="1")]
+    pub from: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub to: ::prost::alloc::string::String,
+    #[prost(string, tag="3")]
+    pub token_id: ::prost::alloc::string::String,
+    #[prost(uint64, tag="4")]
+    pub timestamp: u64,
+    #[prost(uint64, tag="5")]
+    pub block_number: u64,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NameTransfers {
+    #[prost(message, repeated, tag="1")]
+    pub name_transfers: ::prost::alloc::vec::Vec<NameTransfer>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NameTransfer {
+    #[prost(string, tag="1")]
+    pub from: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub to: ::prost::alloc::string::String,
+    #[prost(string, tag="3")]
+    pub token_id: ::prost::alloc::string::String,
+    #[prost(uint64, tag="4")]
+    pub timestamp: u64,
+    #[prost(uint64, tag="5")]
+    pub block_number: u64,
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum ItemType {
@@ -544,7 +584,7 @@ pub enum WearableRarity {
     Legendary = 4,
     Mythic = 5,
     Unique = 6,
-    Exotic = 7
+    Exotic = 7,
 }
 impl WearableRarity {
     /// String value of the enum field names used in the ProtoBuf definition.
